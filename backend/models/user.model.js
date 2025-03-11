@@ -44,6 +44,29 @@ const userSchema = new mongoose.Schema(
     resetPasswordExpireAtDate: Date,
     verificationToken: String,
     verificationTokenExpireAt: Date,
+    profile: {
+      erp: {
+        type: String,
+        default: "",
+      },
+      gender: {
+        type: String,
+        enum: ["Male", "Female", "Other", "Not specified"],
+        default: "Not specified",
+      },
+      phone: {
+        type: String,
+        default: "",
+      },
+      branch: {
+        type: String,
+        default: "",
+      },
+      class: {
+        type: String,
+        default: "",
+      },
+    },
   },
   { timestamps: true }
 );

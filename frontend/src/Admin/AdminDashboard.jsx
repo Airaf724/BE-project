@@ -28,10 +28,8 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="flex-2 ml-64 p-6 overflow-x-auto">
-      <h2 className="text-2xl font-semibold mb-4 text-center">
-        Registered Events
-      </h2>
+    <div className=" relative flex-2 ml-64 p-6 overflow-x-auto">
+      <h2 className="text-2xl font-semibold mb-4 text-center">All Events</h2>
       <div className="overflow-x-auto w-full">
         <table className="min-w-full bg-white border border-gray-300">
           <thead>

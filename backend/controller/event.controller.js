@@ -239,10 +239,10 @@ export const registerEvent = async (req, res) => {
     // Create the registration entry
     const registrationEntry = {
       eventId,
-      status: "Registered", // Ensure correct spelling matching the enum
+      status: "Registered",
     };
 
-    // Update both documents in a transaction
+    // Start a transaction session
     const session = await mongoose.startSession();
     try {
       await session.withTransaction(async () => {
@@ -253,10 +253,13 @@ export const registerEvent = async (req, res) => {
           { session }
         );
 
-        // Update User
+        // Update User: Add event to registeredEvents & increment points by 10
         await User.findByIdAndUpdate(
           userId,
-          { $push: { registeredEvents: registrationEntry } },
+          {
+            $push: { registeredEvents: registrationEntry },
+            $inc: { points: 10 }, // Increment points by 10
+          },
           { session }
         );
       });
@@ -267,6 +270,7 @@ export const registerEvent = async (req, res) => {
     res.status(200).json({
       message: "Registered successfully!",
       status: "Registered",
+      pointsAdded: 10, // Indicate that points were incremented
     });
   } catch (error) {
     console.error("Error registering for event:", error);
@@ -276,6 +280,7 @@ export const registerEvent = async (req, res) => {
     });
   }
 };
+
 export const getSearchResults = async (req, res) => {
   try {
     const { name } = req.query;

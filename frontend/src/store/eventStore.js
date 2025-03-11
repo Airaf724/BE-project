@@ -32,7 +32,6 @@ export const useEventStore = create((set) => ({
         id: eventId,
       });
       set({ event: response.data.event, isLoading: false });
-      // console.log(response.data.event);
     } catch (error) {
       set({ error: "Error fetching events", isLoading: false });
     }
@@ -45,7 +44,6 @@ export const useEventStore = create((set) => ({
         userId,
       });
 
-      // Only update the UI if the registration was successful
       if (response.data.status === "Registered") {
         set((state) => ({
           events: state.events.map((event) =>
@@ -95,7 +93,6 @@ export const useEventStore = create((set) => ({
         events: [...state.events, response.data.event],
         isLoading: false,
       }));
-      console.log("event response ", response);
       return response.data;
     } catch (error) {
       set({
@@ -110,12 +107,10 @@ export const useEventStore = create((set) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await axios.get(`${API_URL}/getdomainevents/${domain}`);
-      console.log(response);
       set({
         domainEvents: response.data.events || [],
         isLoading: false,
       });
-      console.log(response.data);
     } catch (error) {
       set({ error: "Error fetching events", isLoading: false });
       console.error(error);

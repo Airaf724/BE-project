@@ -25,7 +25,7 @@ export const useAuthStore = create((set) => ({
         name,
       });
       set({
-        user: response.data.user,
+        user: response?.data?.user,
         isAuthenticated: true,
         isLoading: false,
       });
@@ -46,7 +46,7 @@ export const useAuthStore = create((set) => ({
       });
       set({
         isAuthenticated: true,
-        user: response.data.user,
+        user: response?.data?.user,
         error: null,
         isLoading: false,
       });
@@ -96,13 +96,28 @@ export const useAuthStore = create((set) => ({
     set({ isCheckingAuth: true, error: null });
     try {
       const response = await axios.get(`${API_URL}/check-auth`);
+      // Log the full response to debug
+      console.log("Full auth response:", response?.data);
+
+      // Check if we have the correct user data structure
+      if (!response?.data?.user) {
+        throw new Error("Invalid user data received");
+      }
+
       set({
-        user: response.data.user,
+        user: response?.data?.user,
         isAuthenticated: true,
-        isCheckingAuth: false,
+        error: null,
       });
     } catch (error) {
-      set({ error: null, isCheckingAuth: false, isAuthenticated: false });
+      console.error("Auth check error:", error);
+      set({
+        user: null,
+        isAuthenticated: false,
+        error: error.response?.data?.message || error.message,
+      });
+    } finally {
+      set({ isCheckingAuth: false });
     }
   },
 

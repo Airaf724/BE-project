@@ -26,6 +26,19 @@ export const useUserStore = create((set) => ({
     }
   },
 
+  setUserprofile: async (id, formData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.put(`${API_URL}/${id}/setprofile`, formData);
+      set({ isLoading: false, user: response.data.data });
+    } catch (e) {
+      set({
+        isLoading: false,
+        error: e.response?.data?.message || "Error setting user profile",
+      });
+    }
+  },
+
   // deleteUser: async (id) => {
   //     set({ isLoading: true, error: null });
   //     try {

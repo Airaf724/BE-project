@@ -105,12 +105,11 @@ const Navbar = () => {
             <div
               className={`${
                 Showstore
-                  ? "flex flex-col px-5 absolute top-[60px] z-50 rounded-[10px] p-2 overflow-auto focus:outline-none text-lg text-[#FFA116] shadow-lg gap-2 bg-white dark:bg-gray-800 transform opacity-100 scale-100"
+                  ? "flex flex-col px-7 py-5 absolute top-[60px] z-50 rounded-[10px] p-2 overflow-auto focus:outline-none text-lg text-[#FFA116] shadow-lg gap-2 bg-white dark:bg-gray-800 transform opacity-100 scale-100"
                   : "hidden"
               }`}
             >
               <Link to="/store">Redeem</Link>
-              <Link to="/premium">Premium</Link>
             </div>
           </li>
         </ul>
@@ -171,7 +170,7 @@ const Navbar = () => {
                     </div>
                   </div>
                   <Link
-                    to={`${user._id}/my-lists`}
+                    to={`${user?._id}/my-lists`}
                     className="flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-gray-100"
                   >
                     <List size={20} />
@@ -179,7 +178,7 @@ const Navbar = () => {
                   </Link>
 
                   <Link
-                    to={`${user._id}/submissions`}
+                    to={`${user?._id}/submissions`}
                     className="flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-gray-100"
                   >
                     <BookmarkIcon size={20} />

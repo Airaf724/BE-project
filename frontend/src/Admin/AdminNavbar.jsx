@@ -61,11 +61,11 @@ const AdminNavbar = () => {
             </li>
             <li>
               <Link
-                to="/admin/assign-rewards"
+                to="/admin/orders"
                 className="block py-2 px-4 hover:bg-gray-700"
                 onClick={() => setIsOpen(false)}
               >
-                Assign Rewards
+                Manage Orders
               </Link>
             </li>
           </ul>

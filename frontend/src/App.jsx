@@ -3,7 +3,7 @@ import SignUpPage from "./pages/SignUpPage";
 import Loginpage from "./pages/Loginpage";
 import EmailVerificationPage from "./pages/EmailVerificationPage";
 import { useAuthStore } from "./store/authStore";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import DashboardPage from "./pages/DashboardPage";
 import LoadingSpinner from "./components/LoadingSpinner";
 import AdminDashboard from "./Admin/AdminDashboard";
@@ -21,13 +21,26 @@ import StorePage from "./pages/StorePage";
 import EventDetailPage from "./pages/EventDetailPage";
 import MangeUsers from "./Admin/page/MangeUsers";
 import ManageEventAttendees from "./Admin/page/ManageEventAttendees";
+import ProfilePage from "./pages/ProfilePage";
+import OrderDetail from "./pages/OrderDetail";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import ManageOrders from "./Admin/page/ManageOrders";
+import OrdersPage from "./pages/OrdersPage";
+
 function App() {
   const { isCheckingAuth, checkAuth, isAuthenticated, user } = useAuthStore();
   const navigate = useNavigate();
-  useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
+  useEffect(() => {
+    const initializeAuth = async () => {
+      await checkAuth();
+      setIsDataLoaded(true);
+    };
+
+    initializeAuth();
+  }, [checkAuth]);
   // protected routes
 
   const RedirectAuthenticatedUser = ({ children }) => {
@@ -40,7 +53,7 @@ function App() {
   // console.log("user is adim", user.isAdmin);
   const ProtectedRoutes = ({ children }) => {
     useEffect(() => {
-      if (!isCheckingAuth) {
+      if (!isCheckingAuth && !isDataLoaded) {
         if (!isAuthenticated) {
           navigate("/login", { replace: true });
         } else if (user?.isAdmin) {
@@ -49,9 +62,9 @@ function App() {
           navigate("/verify-email", { replace: true });
         }
       }
-    }, [isCheckingAuth, isAuthenticated, user, navigate]);
+    }, [isCheckingAuth, isAuthenticated, user, navigate, isDataLoaded]);
 
-    if (isCheckingAuth) {
+    if (isCheckingAuth || !isDataLoaded) {
       return <LoadingSpinner />;
     }
     return children;
@@ -70,6 +83,7 @@ function App() {
   return (
     //min-h-screen flex
     <div className="min-h-screen flex flex-col">
+      <ToastContainer position="top-center" autoClose={3000} />
       {user?.isAdmin ? <AdminNavbar /> : <Navbar />}
       <main className="flex-grow pt-20">
         {" "}
@@ -141,14 +155,32 @@ function App() {
           {/* Admin routes */}
           <Route path="/:user_id/my-lists" element={<UserList />} />
           <Route path="/:user_id/submissions" element={<UserSubmissions />} />
-
+          <Route path="/orders" element={<OrdersPage />} />
           <Route path="/admin/create-event" element={<CreateEvent />} />
           <Route path="/admin/mange" element={<MangeUsers />} />
           <Route
             path="/admin/events/:eventId"
             element={<ManageEventAttendees />}
           />
+          <Route path="/settings" element={<ProfilePage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
+          <Route
+            path="/admin/*"
+            element={
+              <ProtectIsAdminRoute>
+                <AdminDashboard />
+              </ProtectIsAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/orders"
+            element={
+              <ProtectIsAdminRoute>
+                <ManageOrders />
+              </ProtectIsAdminRoute>
+            }
+          />
+          <Route path="/placeorder" element={<OrderDetail />} />
         </Routes>
       </main>
       <Footer />

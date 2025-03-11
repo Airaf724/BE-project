@@ -6,7 +6,15 @@ import {
   VERIFICATION_COMPLETE_EMAIL,
 } from "../mailtrap/emailTemplate.js";
 
-//
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    user: "eventnotifieri2it@gmail.com",
+    pass: "mfznlnyoilkjopgu",
+  },
+});
 
 export const sendVerificationEmail = async (userEmail, verificationToken) => {
   try {

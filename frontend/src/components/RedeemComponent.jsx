@@ -1,42 +1,11 @@
-import cap from "../assets/store/cap.png";
-import kit from "../assets/store/leetcode_kit.png";
-import notebook from "../assets/store/notebook.png"; // Fixed spelling from "notetbook"
-import t_shirt from "../assets/store/t_shirt_promo.png";
 import coin from "../assets/store/coin.png";
+import { useAuthStore } from "../store/authStore";
+import { Link } from "react-router-dom";
+import { products } from "../utils/ProductsData";
 
 const RedeemComponent = () => {
-  const products = [
-    {
-      id: 1,
-      title: "Event.io T-shirt",
-      subtitle: "For Daily Coding Challenge",
-      image: t_shirt,
-      points: 7200,
-    },
-    {
-      id: 2,
-      title: "Event.io Cap",
-      subtitle: "Stylish and comfortable",
-      image: cap,
-      points: 6000,
-    },
-    {
-      id: 3,
-      title: "Event.io Notebook",
-      subtitle: "Big-O Notebook for your notes",
-      image: notebook,
-      points: 1200,
-    },
-    {
-      id: 4,
-      title: "Kit Combo",
-      subtitle: "Includes T-shirt, keychain, and coaster",
-      image: kit,
-      points: 10000,
-    },
-  ];
-
-  const points = 0;
+  const { user } = useAuthStore();
+  const points = user?.points;
 
   return (
     <div className="flex justify-center">
@@ -64,15 +33,27 @@ const RedeemComponent = () => {
                 <p className="text-gray-500 text-sm">{product.subtitle}</p>
               </div>
               {/* Points Badge */}
-              <button
-                disabled={points < product.points}
-                className={`flex  items-center ${
-                  points < product.points ? "bg-[#f5ca8c]" : ""
-                } bg-[#f0ad4e] h-10 text-white px-3 py-1 rounded-lg text-sm`}
+              <Link
+                to={`/placeorder?id=${product.id}&title=${encodeURIComponent(
+                  product.title
+                )}&image=${encodeURIComponent(product.image)}&points=${
+                  product.points
+                }`}
               >
-                {product.points}
-                <img src={coin} alt="coin" className="h-[15px] w-[15px] ml-1" />
-              </button>
+                <button
+                  disabled={points > product.points}
+                  className={`flex items-center ${
+                    points < product.points ? "bg-[#cfb692]" : "bg-[#e19933]"
+                  }  h-10 text-white px-3 py-1 rounded-lg text-sm`}
+                >
+                  {product.points}
+                  <img
+                    src={coin}
+                    alt="coin"
+                    className="h-[15px] w-[15px] ml-1"
+                  />
+                </button>
+              </Link>
             </div>
           </div>
         ))}

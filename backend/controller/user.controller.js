@@ -50,3 +50,28 @@ export const updateStatus = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export const setProfile = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { erp, gender, mobileNumber, branch, classYear } = req.body;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      {
+        profile: { erp, gender, phone: mobileNumber, branch, class: classYear },
+      }
+      // { new: true, runValidators: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({ message: "Profile updated successfully", user: updatedUser });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
+  }
+};

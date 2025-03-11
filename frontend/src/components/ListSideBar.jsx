@@ -30,7 +30,7 @@ export default function ListSidebar() {
         <ul className="space-y-4">
           <li className="flex items-center space-x-2">
             <BookOpen className="w-5 h-5" />
-            {isOpen && <span>Library</span>}
+            {isOpen && <span>My Orders</span>}
           </li>
           <li className="flex items-center space-x-2">
             <GraduationCap className="w-5 h-5" />

@@ -1,47 +1,62 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Item from "./Item";
 import { useEventStore } from "../store/eventStore";
 import { useAuthStore } from "../store/authStore";
 import { useNavigate } from "react-router-dom";
-import EventItem from "./EventItem";
+import { toast } from "react-hot-toast"; // Assuming you're using react-hot-toast for notifications
+
 const PopularEvents = () => {
-  const { events, fetchEvents, registerForEvent } = useEventStore();
+  const { events, fetchEvents, registerForEvent, isLoading } = useEventStore();
   const { user } = useAuthStore();
   const navigate = useNavigate();
+  const [registrationInProgress, setRegistrationInProgress] = useState(false);
 
   useEffect(() => {
     fetchEvents();
-  }, []);
+  }, [fetchEvents]);
 
-  const handleRegistertion = (eventId) => {
+  const handleRegistration = async (eventId) => {
     if (!user) {
       navigate("/login");
       return;
     }
-    registerForEvent(eventId, user._id);
+
+    if (registrationInProgress) {
+      return; // Prevent double submission
+    }
+
+    try {
+      setRegistrationInProgress(true);
+      const response = await registerForEvent(eventId, user._id);
+
+      if (response.status === "Registered") {
+        toast.success("Successfully registered for event!");
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to register for event"
+      );
+    } finally {
+      setRegistrationInProgress(false);
+    }
   };
 
   return (
     <div className="flex flex-col items-center gap-[10px] mb-[100px]">
-      <div className="">
-        <h1 className="text-[#171717] w-[65%] mx-[37%] text-[50px] font-semibold">
+      <div className="w-full max-w-7xl px-4">
+        <h1 className="text-4xl md:text-5xl font-semibold text-center text-[#171717] mb-4">
           Popular Events
         </h1>
         <hr className="w-48 h-1.5 bg-[#252525] rounded-lg mx-auto mb-12" />
 
-        <div
-          className="grid grid-cols-4 mt-[50px] gap-[30px] 
-        max-[1280px]:gap-[10px] max-[1280px]:mt-[30px]
-        max-[1024px]:grid-cols-4 max-[1024px]:gap-[5px] max-[1024px]:mt-[20px]
-        max-[800px]:grid-cols-2 max-[800px]:gap-[5px] max-[800px]:mt-[20px]
-        max-[500px]:grid-cols-2 max-[500px]:gap-[20px]"
-        >
-          {events.map((item, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          {events.map((item) => (
             <Item
-              key={i}
+              key={item._id}
               event={item}
-              handleRegistertion={handleRegistertion}
-              userId={user._id}
+              handleRegistration={handleRegistration}
+              userId={user?._id}
+              disabled={registrationInProgress || isLoading}
             />
           ))}
         </div>

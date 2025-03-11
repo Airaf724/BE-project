@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useEventStore } from "../store/eventStore";
 import Item from "../components/Item";
 import { useAuthStore } from "../store/authStore";
+
 const EventPage = () => {
   const { pathname } = useLocation();
   const domain = pathname.split("/")[2];
@@ -25,14 +26,21 @@ const EventPage = () => {
 
     fetchEvents();
   }, [domain, fetchDomainEvents]);
-
-  const handleRegistertion = (eventId) => {
+  const handleRegistration = async (eventId) => {
     if (!user) {
       navigate("/login");
       return;
     }
-    registerForEvent(eventId, user._id);
+    try {
+      await registerForEvent(eventId, user?._id);
+      // Refresh the events list after registration
+      await fetchDomainEvents(domain);
+    } catch (error) {
+      console.error("Registration failed:", error);
+    }
   };
+
+  console.log(domainEvents);
 
   if (loading) {
     return (
@@ -64,14 +72,13 @@ const EventPage = () => {
         </h1>
         <hr className="w-48 h-1.5 bg-[#252525] rounded-lg mx-auto mb-12" />
 
-        {/* Loading State */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6 justify-center">
           {domainEvents?.map((item, i) => (
             <Item
-              key={i}
+              key={item._id} // Changed from index to unique ID
               event={item}
-              handleRegistertion={handleRegistertion}
-              userId={user._id}
+              handleRegistration={handleRegistration}
+              userId={user?._id}
             />
           ))}
         </div>

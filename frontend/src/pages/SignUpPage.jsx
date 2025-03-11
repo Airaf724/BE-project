@@ -1,5 +1,5 @@
 import Input from "../components/Input";
-import { Loader, Lock, Mail, User } from "lucide-react";
+import { Loader, Lock, Mail, User, Eye, EyeClosed } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
@@ -9,6 +9,8 @@ const SignUpPage = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
   const navigate = useNavigate();
   const { signup, error, isLoading } = useAuthStore();
   const handleSignUp = async (e) => {
@@ -51,13 +53,26 @@ const SignUpPage = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            <Input
-              icon={Lock}
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <div className="relative">
+              <Input
+                icon={Lock}
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                onClick={() => setShowPassword((prevState) => !prevState)}
+              >
+                {showPassword ? (
+                  <EyeClosed className="w-6 h-6 text-gray-500" />
+                ) : (
+                  <Eye className="w-6 h-6 text-gray-500" />
+                )}
+              </button>
+            </div>
 
             {error && (
               <p className="text-red-500 font-semibold mt-2">{error}</p>

@@ -4,10 +4,8 @@ import RedeemComponent from "../components/RedeemComponent";
 import EarnCoinComponent from "../components/EarnCoinComponent";
 const StorePage = () => {
   const [activeTab, setActiveTab] = useState("redeem");
-
   const handleTab = (event) => {
     setActiveTab(event);
-    console.log(activeTab);
   };
   return (
     <div>

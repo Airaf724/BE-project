@@ -6,7 +6,6 @@ import UpcomingEvents from "../components/UpcomingEvents";
 import NewsLetter from "../components/NewsLetter";
 const DashboardPage = () => {
   const { user } = useAuthStore();
-  console.log(user);
   if (!user) {
     return (
       <div className="text-center text-gray-400">Loading user data...</div>

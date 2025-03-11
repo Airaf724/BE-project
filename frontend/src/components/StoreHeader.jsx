@@ -1,13 +1,16 @@
 import React from "react";
 import logoImage from "../assets/footer_logo.jpeg";
 import { Link } from "react-router-dom";
+import { useAuthStore } from "../store/authStore";
 
 const StoreHeader = ({ activeTab, handleTab }) => {
+  const { user } = useAuthStore();
   return (
     <div className="relative h-[400px] bg-gradient-to-b from-[#3c4859] to-[#292929] flex flex-col items-center justify-center">
       {/* Points Box */}
       <div className="absolute top-0 right-[10%] bg-[#181818] rounded-lg px-4 py-2 text-white shadow-md">
-        Your Points: <span className="text-yellow-400 font-semibold">4848</span>
+        Your Points:{" "}
+        <span className="text-yellow-400 font-semibold">{user?.points}</span>
       </div>
 
       {/* Logo Section */}

@@ -26,7 +26,6 @@ const Hero = () => {
 
     searchTimeout.current = setTimeout(async () => {
       try {
-        console.log("Searching for:", searchValue);
         const response = await axios.post(
           `${API_URL}/search?name=${searchValue}`
         );
