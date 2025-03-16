@@ -4,29 +4,39 @@ import { uploadOnCloudinary } from "../utitls/cloudinary.js";
 import { User } from "../models/user.model.js";
 
 export const createEvents = async (req, res) => {
-  const {
-    name,
-    domain,
-    description,
-    location,
-    event_date,
-    event_time,
-    community,
-  } = req.body;
-  const localFilePath = req.file.path;
+  console.log("Request body:", req.body);
+  console.log("Request file:", req.file);
   try {
-    if (
-      (!name ||
-        !domain ||
-        !description ||
-        !location ||
-        !event_date ||
-        !event_time,
-      !community)
-    ) {
-      throw new Error("All fields are required");
+    const {
+      name,
+      domain,
+      description,
+      location,
+      event_date,
+      event_time,
+      community,
+      registrationReward,
+      attendanceReward,
+      collegeId,
+    } = req.body;
+
+    if (!collegeId) {
+      console.log("collegeId not provided");
+      return res
+        .status(400)
+        .json({ success: false, message: "collegeId is required" });
     }
-    const url = await uploadOnCloudinary(localFilePath);
+
+    if (!mongoose.Types.ObjectId.isValid(collegeId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid college ID" });
+    }
+
+    let imageUrl = "";
+    if (req.file) {
+      imageUrl = await uploadOnCloudinary(req.file.path);
+    }
 
     const event = new Event({
       name,
@@ -36,20 +46,22 @@ export const createEvents = async (req, res) => {
       event_date,
       event_time,
       community,
-      image_url: url,
+      image_url: imageUrl,
+      registrationReward,
+      attendanceReward,
+      college: new mongoose.Types.ObjectId(collegeId),
     });
 
     await event.save();
-    res.status(200).json({
-      success: true,
-      message: "Event created successfully",
-      event, // need to be remove later
-    });
+
+    res
+      .status(200)
+      .json({ success: true, message: "Event created successfully", event });
   } catch (error) {
+    console.error("Error in event creation:", error);
     res
       .status(400)
-      .json({ success: false, message: "problem with storing event" });
-    console.log("error in event creation", error);
+      .json({ success: false, message: "Problem with storing event" });
   }
 };
 
@@ -94,23 +106,21 @@ export const getEventById = async (req, res) => {
 };
 export const getDomainEvents = async (req, res) => {
   try {
-    const { domain } = req.params; // Ensure the param name matches the route
+    const { domain } = req.params;
     const events = await Event.find({ domain });
 
-    if (events.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Events not found events length is 0 ",
-      });
-    }
-
-    res.status(200).json({ success: true, events });
-    return events;
+    // Return empty array instead of 404 error when no events found
+    res.status(200).json({
+      success: true,
+      events,
+      count: events.length,
+    });
   } catch (e) {
     console.error("Error in fetching events:", e);
-    res
-      .status(500)
-      .json({ success: false, message: "Problem with fetching events" });
+    res.status(500).json({
+      success: false,
+      message: "Problem with fetching events",
+    });
   }
 };
 
@@ -236,6 +246,9 @@ export const registerEvent = async (req, res) => {
       return res.status(400).json({ message: "User already registered" });
     }
 
+    // Get the registration reward points from the event
+    const pointsToAdd = event.registrationReward || 0;
+
     // Create the registration entry
     const registrationEntry = {
       eventId,
@@ -253,12 +266,12 @@ export const registerEvent = async (req, res) => {
           { session }
         );
 
-        // Update User: Add event to registeredEvents & increment points by 10
+        // Update User: Add event to registeredEvents & increment points by event's registrationReward
         await User.findByIdAndUpdate(
           userId,
           {
             $push: { registeredEvents: registrationEntry },
-            $inc: { points: 10 }, // Increment points by 10
+            $inc: { points: pointsToAdd }, // Increment points by event's registrationReward
           },
           { session }
         );
@@ -270,7 +283,7 @@ export const registerEvent = async (req, res) => {
     res.status(200).json({
       message: "Registered successfully!",
       status: "Registered",
-      pointsAdded: 10, // Indicate that points were incremented
+      pointsAdded: pointsToAdd, // Indicate the actual points added
     });
   } catch (error) {
     console.error("Error registering for event:", error);

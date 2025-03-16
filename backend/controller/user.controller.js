@@ -1,5 +1,5 @@
 import { User } from "../models/user.model.js";
-
+import { Event } from "../models/events.model.js";
 export const getUsersData = async (req, res) => {
   try {
     const users = await User.find({});
@@ -28,15 +28,26 @@ export const getUsersById = async (req, res) => {
 
 export const updateStatus = async (req, res) => {
   const { userId, eventId, newStatus } = req.body;
+  let { reward } = req.body;
 
   if (!userId || !eventId || !newStatus) {
     return res.status(400).json({ message: "Missing required fields" });
   }
 
+  if (newStatus !== "Completed") {
+    reward = 0;
+  }
+
+  console.log("reward", reward, "   , newStatus", newStatus);
+
   try {
+    // Update the user's event status
     const user = await User.findOneAndUpdate(
       { _id: userId, "registeredEvents.eventId": eventId },
-      { $set: { "registeredEvents.$.status": newStatus } },
+      {
+        $set: { "registeredEvents.$.status": newStatus },
+        $inc: { points: reward },
+      },
       { new: true }
     );
 
@@ -44,7 +55,12 @@ export const updateStatus = async (req, res) => {
       return res.status(404).json({ message: "User or event not found" });
     }
 
-    res.status(200).json({ message: "Status updated successfully", user });
+    console.log("user", user);
+
+    res.status(200).json({
+      message: "Status updated successfully",
+      user,
+    });
   } catch (error) {
     console.error("Error updating status:", error);
     res.status(500).json({ message: "Server error" });
@@ -54,24 +70,35 @@ export const updateStatus = async (req, res) => {
 export const setProfile = async (req, res) => {
   try {
     const { id } = req.params;
-    const { erp, gender, mobileNumber, branch, classYear } = req.body;
+    const { erp, gender, mobileNumber, branch, collegeId } = req.body;
 
+    // Find the user and update profile fields
     const updatedUser = await User.findByIdAndUpdate(
       id,
       {
-        profile: { erp, gender, phone: mobileNumber, branch, class: classYear },
-      }
-      // { new: true, runValidators: true }
+        $set: {
+          "profile.erp": erp,
+          "profile.gender": gender,
+          "profile.phone": mobileNumber,
+          "profile.branch": branch,
+          isProfileComplete: true, // Ensure this gets updated
+          college: collegeId,
+        },
+      },
+      { new: true }
     );
 
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.json({ message: "Profile updated successfully", user: updatedUser });
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user: updatedUser,
+    });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Internal Server Error", error: error.message });
+    console.error("Error updating profile:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };

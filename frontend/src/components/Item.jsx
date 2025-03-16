@@ -21,12 +21,21 @@ const Item = ({ event, handleRegistration, userId, disabled }) => {
     return text;
   };
 
-  const handleClick = () => {
-    setIsDialogOpen(true);
+  const registrationReward = event?.registrationReward;
+
+  // Modified to first register and then show dialog
+  const handleRegisterClick = async () => {
+    try {
+      await handleRegistration(event._id);
+      setIsDialogOpen(true); // Show dialog after successful registration
+    } catch (error) {
+      console.error("Registration failed:", error);
+      // Handle error if needed
+    }
   };
 
-  const handleConfirm = async () => {
-    await handleRegistration(event._id);
+  // Dialog just needs to close now
+  const handleDialogClose = () => {
     setIsDialogOpen(false);
   };
 
@@ -77,7 +86,7 @@ const Item = ({ event, handleRegistration, userId, disabled }) => {
         </div>
 
         <button
-          onClick={() => handleRegistration(event._id)}
+          onClick={handleRegisterClick} // Changed to the new handler
           disabled={disabled || isRegistered}
           className={`w-full py-2 px-4 rounded ${
             isRegistered
@@ -93,8 +102,9 @@ const Item = ({ event, handleRegistration, userId, disabled }) => {
 
       <CoinDialog
         isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-        onConfirm={handleConfirm}
+        registrationReward={registrationReward}
+        onClose={handleDialogClose}
+        onConfirm={handleDialogClose} // Just close the dialog on confirm
       />
     </div>
   );

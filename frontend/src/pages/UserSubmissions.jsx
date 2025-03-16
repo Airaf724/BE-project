@@ -5,9 +5,17 @@ import Pageination from "../components/Pageination";
 
 const UserSubmissions = () => {
   const { user } = useAuthStore();
-  const { events } = useEventStore();
+  const { events, fetchEvents } = useEventStore();
   const [registeredEvents, setRegisteredEvents] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
+  const [hasFetched, setHasFetched] = useState(false); // State to track fetching status
+
+  useEffect(() => {
+    if (!hasFetched && events.length === 0) {
+      fetchEvents();
+      setHasFetched(true); // Set to true after calling fetchEvents once
+    }
+  }, [hasFetched, events]);
 
   useEffect(() => {
     if (user && events.length > 0) {

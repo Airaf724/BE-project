@@ -2,14 +2,14 @@ import React from "react";
 import { motion } from "framer-motion";
 import coin from "../assets/store/coin.png";
 
-const CoinDialog = ({ isOpen, onClose }) => {
+const CoinDialog = ({ isOpen, registrationReward, onClose }) => {
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white w-[500px] p-6 rounded-lg shadow-lg relative flex flex-col items-center">
         <h2 className="text-xl font-bold text-green-600 mb-4">
-          Congratulations🎉! You have earned +10 points
+          {` Congratulations🎉! You have earned ${registrationReward} points`}
         </h2>
         <motion.img
           src={coin}

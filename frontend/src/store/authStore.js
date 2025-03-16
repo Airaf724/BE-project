@@ -8,7 +8,7 @@ const API_URL =
 
 axios.defaults.withCredentials = true;
 
-export const useAuthStore = create((set) => ({
+export const useAuthStore = create((set, get) => ({
   user: null,
   isAuthenticated: false,
   error: null,
@@ -16,27 +16,37 @@ export const useAuthStore = create((set) => ({
   isCheckingAuth: true,
   message: null,
 
-  signup: async (email, password, name) => {
+  signup: async (email, password, name, role) => {
     set({ isLoading: true, error: null });
     try {
       const response = await axios.post(`${API_URL}/signup`, {
         email,
         password,
         name,
+        role,
       });
-      set({
-        user: response?.data?.user,
-        isAuthenticated: true,
-        isLoading: false,
-      });
+
+      // Make sure we get proper user data
+      if (response?.data?.user) {
+        set({
+          user: response.data.user,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+        // console.log("sign in ", response.data);
+        // return response.data;
+      } else {
+        throw new Error("No user data received from signup");
+      }
     } catch (error) {
       set({
-        error: error.response.data.message || "Error signing up",
+        error: error.response?.data?.message || "Error signing up",
         isLoading: false,
       });
       throw error;
     }
   },
+
   login: async (email, password) => {
     set({ isLoading: true, error: null });
     try {
@@ -44,12 +54,28 @@ export const useAuthStore = create((set) => ({
         email,
         password,
       });
-      set({
-        isAuthenticated: true,
-        user: response?.data?.user,
-        error: null,
-        isLoading: false,
-      });
+
+      // Check if we have valid user data before updating state
+      if (response?.data?.user) {
+        // Update user first, then authentication state
+        set({
+          user: response.data.user,
+          isAuthenticated: true,
+          error: null,
+          isLoading: false,
+        });
+
+        // Double-check that user state was properly updated
+        const currentUser = get().user;
+        if (!currentUser) {
+          // If user is still null, manually trigger another check
+          await get().checkAuth();
+        }
+
+        // return response.data;
+      } else {
+        throw new Error("No user data received from login");
+      }
     } catch (error) {
       set({
         error: error.response?.data?.message || "Error logging in",
@@ -74,41 +100,50 @@ export const useAuthStore = create((set) => ({
       throw error;
     }
   },
+
   verifyEmail: async (code) => {
     set({ isLoading: true, error: null });
     try {
       const response = await axios.post(`${API_URL}/verify-email`, { code });
-      set({
-        user: response.data.user,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-      return response.data;
+      if (response?.data?.user) {
+        set({
+          user: response?.data?.user,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+        // return response.data;
+      } else {
+        throw new Error("No user data received from verification");
+      }
     } catch (error) {
+      console.log(error);
       set({
-        error: error.response.data.message || "Error verifying email",
+        error: error.response?.data?.message || "Error verifying email",
         isLoading: false,
       });
       throw error;
     }
   },
+
   checkAuth: async () => {
     set({ isCheckingAuth: true, error: null });
     try {
       const response = await axios.get(`${API_URL}/check-auth`);
-      // Log the full response to debug
-      console.log("Full auth response:", response?.data);
-
       // Check if we have the correct user data structure
-      if (!response?.data?.user) {
-        throw new Error("Invalid user data received");
+      if (response?.data?.success && response?.data?.user) {
+        set({
+          user: response.data.user,
+          isAuthenticated: true,
+          error: null,
+        });
+        // return response.data;
+      } else {
+        set({
+          user: null,
+          isAuthenticated: false,
+        });
+        console.log("Auth check: No valid user data in response");
       }
-
-      set({
-        user: response?.data?.user,
-        isAuthenticated: true,
-        error: null,
-      });
     } catch (error) {
       console.error("Auth check error:", error);
       set({
@@ -132,7 +167,7 @@ export const useAuthStore = create((set) => ({
       set({
         isLoading: false,
         error:
-          error.response.data.message || "Error sending reset password email",
+          error.response?.data?.message || "Error sending reset password email",
       });
       throw error;
     }
@@ -148,7 +183,7 @@ export const useAuthStore = create((set) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: error.response.data.message || "Error resetting password",
+        error: error.response?.data?.message || "Error resetting password",
       });
       throw error;
     }

@@ -9,7 +9,7 @@ export const checkAdmin = async (req, res, next) => {
         .json({ success: false, message: "User not Found" });
     }
 
-    if (!user.isAdmin) {
+    if (user.role !== "admin") {
       return res
         .status(403)
         .json({ success: false, message: "Unauthorized - Not an admin" });

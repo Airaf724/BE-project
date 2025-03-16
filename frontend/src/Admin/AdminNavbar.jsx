@@ -3,13 +3,16 @@ import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import logoImage from "../assets/footer_logo.jpeg";
 import { useAuthStore } from "../store/authStore";
+import { useNavigate } from "react-router-dom";
 
 const AdminNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, isAuthenticated, logout } = useAuthStore();
   const [showSidebar, setShowSidebar] = useState(true);
+  const navigate = useNavigate();
   const handleLogout = () => {
     logout();
+    navigate("/login");
   };
 
   const toggleSidebar = () => {

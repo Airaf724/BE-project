@@ -44,6 +44,13 @@ const EventSchema = new mongoose.Schema(
     image_url: {
       type: String, // default image url if not provided by user.
     },
+    registrationReward: { type: Number, default: 0 }, // Points for registering
+    attendanceReward: { type: Number, default: 0 }, // Points for attending
+    college: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "College",
+      required: true,
+    },
   },
   { timestamps: true }
 );

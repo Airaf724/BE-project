@@ -1,4 +1,4 @@
-import { Navigate, replace, Route, Router, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import SignUpPage from "./pages/SignUpPage";
 import Loginpage from "./pages/Loginpage";
 import EmailVerificationPage from "./pages/EmailVerificationPage";
@@ -27,6 +27,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ManageOrders from "./Admin/page/ManageOrders";
 import OrdersPage from "./pages/OrdersPage";
+import CollegeDetailsPage from "./Admin/page/CollegeDetailsPage";
 
 function App() {
   const { isCheckingAuth, checkAuth, isAuthenticated, user } = useAuthStore();
@@ -35,59 +36,88 @@ function App() {
 
   useEffect(() => {
     const initializeAuth = async () => {
-      await checkAuth();
-      setIsDataLoaded(true);
+      try {
+        await checkAuth();
+      } finally {
+        setIsDataLoaded(true);
+      }
     };
 
     initializeAuth();
   }, [checkAuth]);
-  // protected routes
 
+  // Don't allow authenticated users to access login/signup pages
   const RedirectAuthenticatedUser = ({ children }) => {
-    if (isAuthenticated) {
+    // Only redirect if we're certain about authentication state
+    if (isDataLoaded && isAuthenticated && user) {
       return <Navigate to="/" replace />;
     }
 
-    return children;
+    // Only show login/signup when we're sure user is not authenticated
+    if (isDataLoaded) {
+      return children;
+    }
+
+    return <LoadingSpinner />;
   };
-  // console.log("user is adim", user.isAdmin);
+
+  // Protect routes that require authentication
+  // Protect routes that require authentication
   const ProtectedRoutes = ({ children }) => {
     useEffect(() => {
-      if (!isCheckingAuth && !isDataLoaded) {
+      if (isDataLoaded && !isCheckingAuth) {
         if (!isAuthenticated) {
           navigate("/login", { replace: true });
-        } else if (user?.isAdmin) {
+        } else if (
+          user?.isProfileComplete === false &&
+          user?.role === "admin"
+        ) {
+          navigate("/admin/collgedetails", { replace: true });
+        } else if (
+          user?.isProfileComplete === false &&
+          user?.role === "student"
+        ) {
+          navigate("/settings", { replace: true });
+        } else if (user?.role === "admin") {
           navigate("/admin", { replace: true });
         } else if (user?.isVerified === false) {
           navigate("/verify-email", { replace: true });
         }
       }
-    }, [isCheckingAuth, isAuthenticated, user, navigate, isDataLoaded]);
+    }, [isDataLoaded, isCheckingAuth, isAuthenticated, user]);
+    return children;
+  };
+  // Rest of the code remains the same
+
+  // Protect admin routes
+  const ProtectIsAdminRoute = ({ children }) => {
+    useEffect(() => {
+      if (isDataLoaded && !isCheckingAuth && user?.role !== "admin") {
+        navigate("/", { replace: true });
+      }
+    }, [isDataLoaded, isCheckingAuth, user]);
 
     if (isCheckingAuth || !isDataLoaded) {
       return <LoadingSpinner />;
     }
-    return children;
-  };
 
-  const ProtectIsAdminRoute = ({ children }) => {
-    if (!user?.isAdmin) {
-      return <div>Your not authorized to access this page </div>;
+    if (user?.role !== "admin") {
+      return <div>You're not authorized to access this page</div>;
     }
 
     return children;
   };
 
-  if (isCheckingAuth) return <LoadingSpinner />;
+  // Show loading spinner while checking authentication
+  if (isCheckingAuth && !isDataLoaded) {
+    return <LoadingSpinner />;
+  }
 
   return (
-    //min-h-screen flex
     <div className="min-h-screen flex flex-col">
       <ToastContainer position="top-center" autoClose={3000} />
-      {user?.isAdmin ? <AdminNavbar /> : <Navbar />}
+      {user?.role === "admin" ? <AdminNavbar /> : <Navbar />}
       <main className="flex-grow pt-20">
-        {" "}
-        {/* Add top padding to account for fixed navbar */}
         <Routes>
           <Route
             path="/"
@@ -114,7 +144,8 @@ function App() {
             }
           />
           <Route path="/verify-email" element={<EmailVerificationPage />} />
-
+          <Route path="/settings" element={<ProfilePage />} />
+          <Route path="/admin/collgedetails" element={<CollegeDetailsPage />} />
           <Route
             path="/forgot-password"
             element={
@@ -131,7 +162,6 @@ function App() {
               </RedirectAuthenticatedUser>
             }
           />
-
           <Route
             path="/store"
             element={
@@ -140,7 +170,6 @@ function App() {
               </ProtectedRoutes>
             }
           />
-
           {/* Admin routes */}
           <Route
             path="/admin"
@@ -162,7 +191,7 @@ function App() {
             path="/admin/events/:eventId"
             element={<ManageEventAttendees />}
           />
-          <Route path="/settings" element={<ProfilePage />} />
+
           <Route path="*" element={<Navigate to="/" replace />} />
           <Route
             path="/admin/*"

@@ -9,7 +9,7 @@ const EmailVerificationPage = () => {
   const inputRefs = useRef([]);
   const navigate = useNavigate();
 
-  const { error, isLoading, verifyEmail } = useAuthStore();
+  const { error, isLoading, verifyEmail, user } = useAuthStore();
 
   const handleChange = (index, value) => {
     const newCode = [...code];
@@ -46,12 +46,17 @@ const EmailVerificationPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const verificationCode = code.join("");
+
     try {
       await verifyEmail(verificationCode);
-      navigate("/");
       toast.success("Email verified successfully");
+      if (user?.role === "student") {
+        navigate("/settings"); // Ensure this line is executed
+      } else {
+        navigate("/admin/collegedetails");
+      }
     } catch (error) {
-      console.log(error);
+      console.log("Error during verification:", error);
     }
   };
 

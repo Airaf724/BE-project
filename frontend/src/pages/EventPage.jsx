@@ -12,6 +12,7 @@ const EventPage = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  console.log("domain", domain);
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -39,8 +40,6 @@ const EventPage = () => {
       console.error("Registration failed:", error);
     }
   };
-
-  console.log(domainEvents);
 
   if (loading) {
     return (

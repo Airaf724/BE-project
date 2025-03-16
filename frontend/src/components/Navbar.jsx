@@ -12,6 +12,8 @@ import { useState, useEffect, useRef } from "react";
 import logoImage from "../assets/footer_logo.jpeg";
 import { useAuthStore } from "../store/authStore";
 import NotificationsDropdown from "./NotificationsDropdown ";
+import { useNavigate } from "react-router-dom";
+
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuthStore();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -19,8 +21,10 @@ const Navbar = () => {
   const profileRef = useRef(null);
   const storeRef = useRef(null);
   const [Showstore, setShowstore] = useState(false);
+  const navigate = useNavigate();
   const handleLogout = () => {
     logout();
+    navigate("/login");
     setIsProfileOpen(false);
   };
 

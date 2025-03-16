@@ -13,7 +13,6 @@ export const useOrderStore = create((set) => ({
 
   placeOrder: async (name, email, phone, address, item) => {
     try {
-      // console.log(item);
       console.log("Sending Order Data:", { name, email, phone, address, item });
 
       const response = await axios.post(`${API_URL}/placeorder`, {

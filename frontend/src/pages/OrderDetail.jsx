@@ -52,8 +52,6 @@ const OrderDetail = () => {
         item
       );
 
-      console.log("Order Response:", response); // Debugging
-
       if (response?.success) {
         toast.success(response.message || "Order placed successfully!");
         setTimeout(() => {

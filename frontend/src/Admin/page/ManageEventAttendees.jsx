@@ -43,7 +43,10 @@ const ManageEventAttendees = () => {
     if (eventId) {
       fetchEvent();
     }
-  }, [eventId, event]);
+  }, [eventId]);
+
+  // console.log("event", event?.attendanceReward);
+  const reward = event?.attendanceReward || 0;
 
   const handleStatusChange = async (userId, eventId, newStatus) => {
     setStatusMap((prev) => ({ ...prev, [userId]: newStatus }));
@@ -53,6 +56,7 @@ const ManageEventAttendees = () => {
         userId,
         eventId,
         newStatus,
+        reward,
       });
     } catch (error) {
       console.error("Error updating status:", error);

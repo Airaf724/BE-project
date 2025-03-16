@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      index: true, // Explicitly indexing for faster lookups
     },
     password: {
       type: String,
@@ -17,15 +18,20 @@ const userSchema = new mongoose.Schema(
     },
     lastloginDate: {
       type: Date,
-      default: Date.now(),
+      default: Date.now, // Fix: Use Date.now without parentheses
     },
     isVerified: {
       type: Boolean,
       default: false,
     },
-    isAdmin: {
+    isProfileComplete: {
       type: Boolean,
       default: false,
+    },
+    role: {
+      type: String,
+      enum: ["student", "admin"], // Ensure this matches frontend
+      default: "student",
     },
     registeredEvents: [
       {
@@ -62,11 +68,12 @@ const userSchema = new mongoose.Schema(
         type: String,
         default: "",
       },
-      class: {
-        type: String,
-        default: "",
-      },
     },
+    college: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "College",
+      default: null,
+    }, // Links user to a specific college
   },
   { timestamps: true }
 );

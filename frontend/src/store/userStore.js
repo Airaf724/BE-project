@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import axios from "axios";
-
 const API_URL =
   import.meta.env.MODE === "development"
     ? "http://localhost:5000/api/users"
@@ -30,7 +29,8 @@ export const useUserStore = create((set) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await axios.put(`${API_URL}/${id}/setprofile`, formData);
-      set({ isLoading: false, user: response.data.data });
+      set({ isLoading: false, user: response?.data?.data });
+      useAuthStore.getState().checkAuth();
     } catch (e) {
       set({
         isLoading: false,

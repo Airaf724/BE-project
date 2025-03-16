@@ -5,6 +5,7 @@ import authroutes from "./routes/auth.routes.js";
 import eventroutes from "./routes/event.routes.js";
 import userroutes from "./routes/user.routes.js";
 import orderroutes from "./routes/order.routes.js";
+import collegeroutes from "./routes/college.routes.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
@@ -20,6 +21,7 @@ app.use("/api/auth", authroutes);
 app.use("/api/events", eventroutes);
 app.use("/api/users", userroutes);
 app.use("/api/orders", orderroutes);
+app.use("/api/colleges", collegeroutes);
 app.listen(PORT, () => {
   connectDb();
   console.log("server started at port ", PORT);

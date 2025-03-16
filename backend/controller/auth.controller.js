@@ -15,7 +15,7 @@ import {
 const clientUrl = process.env.CLIENT_URL;
 
 export const signup = async (req, res) => {
-  const { email, password, name } = req.body;
+  const { email, password, name, role } = req.body;
 
   try {
     if (!email || !password || !name) {
@@ -33,6 +33,7 @@ export const signup = async (req, res) => {
       email,
       password: hashPassword,
       name,
+      role,
       verificationToken: verificationToken,
       verificationTokenExpireAt: Date.now() + 86400000, // 24 hours
     });
@@ -73,7 +74,11 @@ export const verifyEmail = async (req, res) => {
     user.verificationTokenExpireAt = undefined;
     await user.save();
     await sendWelcomeEmail(user.email, user.name);
-    res.status(200).json({ success: true, message: "verified successfully" });
+    res.status(200).json({
+      success: true,
+      message: "verified successfully",
+      user: { ...user, password: null },
+    });
   } catch (e) {
     console.error(e);
     res.status(400).json({ status: false, message: "Failed to verify user" });
@@ -142,9 +147,6 @@ export const forgotPassword = async (req, res) => {
       user.email,
       `${process.env.CLIENT_URL}/reset-password/${resetToken}`
     );
-
-    console.log(`${process.env.CLIENT_URL}/reset-password/${resetToken}`);
-
     res.status(200).json({
       success: true,
       message: "Password reset link sent to your email",

@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   User,
   Phone,
-  GraduationCap,
   Building2,
   ChevronDown,
   PersonStanding,
@@ -11,38 +10,84 @@ import { motion } from "framer-motion";
 import { useAuthStore } from "../store/authStore";
 import { useUserStore } from "../store/userStore";
 import { useNavigate } from "react-router-dom";
-const ProfilePage = () => {
-  const { user } = useAuthStore();
-  const profile = user?.profile;
+import { useCollegeStore } from "../store/collegeStore";
 
-  const [erp, setErpNumber] = useState(profile?.erp || "");
-  const [branch, setBranch] = useState(profile?.branch || "");
-  const [classYear, setClassYear] = useState(profile?.class || "");
-  const [gender, setGender] = useState(profile?.gender || "");
-  const [mobileNumber, setMobileNumber] = useState(profile?.phone || "");
+const ProfilePage = () => {
+  const { user, isCheckingAuth } = useAuthStore();
   const { setUserprofile } = useUserStore();
   const navigate = useNavigate();
+  const { colleges, getColleges, loading } = useCollegeStore();
+  const [collegeId, setCollegeId] = useState(""); // New state for selected college
+  const userProfile = user.profile || {};
+  const [erp, setErpNumber] = useState(userProfile.erp || "");
+  const [branch, setBranch] = useState(userProfile.branch || "");
+  const [gender, setGender] = useState(userProfile.gender || "");
+  const [mobileNumber, setMobileNumber] = useState(userProfile.phone || "");
 
-  const handleSubmit = (e) => {
+  // Fetch colleges when component mounts
+  useEffect(() => {
+    getColleges().catch((error) => {
+      console.error("Failed to fetch colleges:", error);
+    });
+  }, []);
+
+  // Handle loading state
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading your profile...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    useEffect(() => {
+      navigate("/login");
+    }, []);
+    return null;
+  }
+
+  const userId = user._doc?._id || user._id;
+
+  // Extract profile, handling different data structures
+
+  // Set college ID from user data if available
+  useEffect(() => {
+    if (user && user.college) {
+      setCollegeId(user.college);
+    }
+  }, [user]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission
-    if (!erp || !mobileNumber || !classYear || !branch || !gender) {
+
+    console.log("Submitting with user ID:", userId);
+
+    if (!erp || !mobileNumber || !branch || !gender || !collegeId) {
       alert("Please fill in all required fields");
+      return;
+    }
+
+    if (!userId) {
+      console.error("User ID is missing", user);
+      alert("User information is not available. Please log in again.");
       return;
     }
 
     const formData = {
       erp,
       branch,
-      classYear,
       gender,
-      mobileNumber,
+      mobileNumber: mobileNumber,
+      collegeId, // Include college ID in the form data
     };
+
     try {
-      setUserprofile(user._id, formData);
+      // Pass collegeId to setUserprofile function
+      await setUserprofile(userId, formData);
       navigate("/");
     } catch (error) {
-      console.log("profile error: " + error);
+      console.log("Profile update error:", error);
     }
   };
 
@@ -64,7 +109,7 @@ const ProfilePage = () => {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="ERP Number"
+                  placeholder="PRN Number"
                   value={erp}
                   onChange={(e) => setErpNumber(e.target.value)}
                   className="w-full px-10 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -101,20 +146,29 @@ const ProfilePage = () => {
                 <ChevronDown className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
               </div>
 
+              {/* College Dropdown - Moved above mobile number */}
               <div className="relative">
                 <select
-                  value={classYear}
-                  onChange={(e) => setClassYear(e.target.value)}
+                  value={collegeId}
+                  onChange={(e) => setCollegeId(e.target.value)}
                   className="w-full px-10 py-2 bg-gray-50 border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  disabled={loading}
                 >
-                  <option value="">Select Class</option>
-                  <option value="FE">FE</option>
-                  <option value="SE">SE</option>
-                  <option value="TE">TE</option>
-                  <option value="BE">BE</option>
+                  <option value="">Select College</option>
+                  {colleges &&
+                    colleges.map((college) => (
+                      <option key={college._id} value={college._id}>
+                        {college.name}
+                      </option>
+                    ))}
                 </select>
-                <GraduationCap className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                <Building2 className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                 <ChevronDown className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
+                {loading && (
+                  <span className="absolute right-10 top-2.5 text-sm text-gray-500">
+                    Loading...
+                  </span>
+                )}
               </div>
 
               <div className="relative">

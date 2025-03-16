@@ -10,6 +10,7 @@ const SignUpPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [role, setRole] = useState("student"); // Default role
 
   const navigate = useNavigate();
   const { signup, error, isLoading } = useAuthStore();
@@ -17,7 +18,7 @@ const SignUpPage = () => {
     e.preventDefault();
 
     try {
-      await signup(email, password, name);
+      await signup(email, password, name, role);
       navigate("/verify-email");
     } catch (error) {
       console.log(error);
@@ -72,6 +73,25 @@ const SignUpPage = () => {
                   <Eye className="w-6 h-6 text-gray-500" />
                 )}
               </button>
+            </div>
+            {/* Role Selection Dropdown */}
+            <div className="mt-4">
+              <div className="flex gap-4 mt-2">
+                {["student", "admin"].map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    className={`w-1/2 py-2 text-center rounded-lg font-semibold transition-all duration-300 ${
+                      role === option
+                        ? "border-2 border-green-400 text-green-600 shadow-md shadow-green-500/50"
+                        : "border border-gray-600 text-black"
+                    }`}
+                    onClick={() => setRole(option)}
+                  >
+                    {option.charAt(0).toUpperCase() + option.slice(1)}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {error && (
