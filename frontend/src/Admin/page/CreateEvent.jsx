@@ -21,6 +21,7 @@ const CreateEvent = () => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
 
+  console.log("adminid", user?.college);
   const [eventData, setEventData] = useState({
     name: "",
     description: "",

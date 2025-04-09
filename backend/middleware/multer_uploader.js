@@ -10,10 +10,3 @@ const uploads = multer({
   }),
 });
 export const upload = uploads.single("image");
-
-// export const upload = multer({
-//   storage: storage,
-//   fileFilter: (req, file, cb) => {
-//     cb(null, true); // Accept all files
-//   },
-// }).single("images");

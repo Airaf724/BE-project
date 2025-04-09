@@ -1,9 +1,15 @@
 import React, { useEffect } from "react";
 import { useUserStore } from "../../store/userStore.js";
+import { useAuthStore } from "../../store/authStore.js";
 const MangeUsers = () => {
   const { users, fetchUsers } = useUserStore();
+  const { user } = useAuthStore();
+
+  console.log("user ,", user?.college);
+  const collegeId = user?.college;
+
   useEffect(() => {
-    fetchUsers();
+    fetchUsers(collegeId);
   }, []);
   return (
     <div className="flex-2 ml-64 p-6 overflow-x-auto">

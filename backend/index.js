@@ -5,6 +5,7 @@ import authroutes from "./routes/auth.routes.js";
 import eventroutes from "./routes/event.routes.js";
 import userroutes from "./routes/user.routes.js";
 import orderroutes from "./routes/order.routes.js";
+import rewardroutes from "./routes/reward.routes.js";
 import collegeroutes from "./routes/college.routes.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -22,6 +23,7 @@ app.use("/api/events", eventroutes);
 app.use("/api/users", userroutes);
 app.use("/api/orders", orderroutes);
 app.use("/api/colleges", collegeroutes);
+app.use("/api/rewards", rewardroutes);
 app.listen(PORT, () => {
   connectDb();
   console.log("server started at port ", PORT);

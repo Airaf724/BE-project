@@ -15,12 +15,34 @@ export const useEventStore = create((set) => ({
   isLoading: true,
   domainEvents: [],
 
-  fetchEvents: async () => {
+  fetchEvents: async (collegeId, activeTab) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}/getevents`);
-      set({ events: response.data.event, isLoading: false });
+      const response = await axios.get(`${API_URL}/getevents`, {
+        params: { collegeId, activeTab },
+      });
+      set({ events: response.data.events, isLoading: false });
     } catch (error) {
+      console.error(
+        "Error fetching events:",
+        error.response?.data?.message || error.message
+      );
+      set({ error: "Error fetching events", isLoading: false });
+    }
+  },
+
+  fetchEventsByAdmin: async (adminId) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.post(`${API_URL}/geteventsbyadmin`, {
+        adminId,
+      });
+      set({ events: response.data.events, isLoading: false });
+    } catch (error) {
+      console.error(
+        "Error fetching events:",
+        error.response?.data?.message || error.message
+      );
       set({ error: "Error fetching events", isLoading: false });
     }
   },

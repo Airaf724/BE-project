@@ -3,11 +3,15 @@ import { useEventStore } from "../store/eventStore";
 import { formatDate } from "../utils/Date.js";
 import Pageination from "../components/Pageination.jsx";
 import { Link } from "react-router-dom";
+import { useAuthStore } from "../store/authStore.js";
 const AdminDashboard = () => {
-  const { events, fetchEvents } = useEventStore();
+  const { events, fetchEventsByAdmin } = useEventStore();
   const [currentPage, setCurrentPage] = useState(0);
+  const { user } = useAuthStore();
+  const collegeId = user?.college;
+
   useEffect(() => {
-    fetchEvents();
+    fetchEventsByAdmin(collegeId);
   }, []);
 
   const PAGE_SIZE = 6;

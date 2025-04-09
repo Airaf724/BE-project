@@ -71,6 +71,15 @@ const AdminNavbar = () => {
                 Manage Orders
               </Link>
             </li>
+            <li>
+              <Link
+                to="/admin/addrewards"
+                className="block py-2 px-4 hover:bg-gray-700"
+                onClick={() => setIsOpen(false)}
+              >
+                Add Rewards
+              </Link>
+            </li>
           </ul>
           <div className="absolute bottom-4 w-full px-4">
             {isAuthenticated && (

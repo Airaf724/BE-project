@@ -12,10 +12,12 @@ export const useUserStore = create((set) => ({
   error: null,
   isLoading: false,
 
-  fetchUsers: async () => {
+  fetchUsers: async (collegeId) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}/getusers`);
+      const response = await axios.post(`${API_URL}/getusers`, {
+        collegeId: collegeId,
+      });
       set({ users: response.data.data, isLoading: false });
     } catch (error) {
       set({

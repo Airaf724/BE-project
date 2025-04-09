@@ -1,37 +1,64 @@
 import mongoose from "mongoose";
 
-const orderSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-  },
-  phone: {
-    type: String,
-    required: true,
-  },
-  address: {
-    type: String,
-    required: true,
-  },
-  item: {
-    name: {
+// models/Order.js
+
+const OrderSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    userName: {
       type: String,
       required: true,
     },
-    size: {
+    userEmail: {
       type: String,
-      default: "M",
+      required: true,
+    },
+    rewardId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Reward",
+      required: true,
+    },
+    courseName: {
+      type: String,
+      required: true,
+    },
+    coursePoints: {
+      type: Number,
+      required: true,
+    },
+    courseLink: {
+      type: String,
+      required: true,
+    },
+    credentials: {
+      email: {
+        type: String,
+        default: "",
+      },
+      password: {
+        type: String,
+        default: "",
+      },
+    },
+    status: {
+      type: String,
+      enum: ["pending", "processing", "completed", "rejected", "cancelled"],
+      default: "pending",
+    },
+    adminNotes: {
+      type: String,
+      default: "",
+    },
+    completedAt: {
+      type: Date,
+      default: null,
     },
   },
-  status: {
-    type: String,
-    enum: ["Pending", "InProgress", "Completed", "Rejected"],
-    default: "Pending",
-  },
-});
+  { timestamps: true }
+);
 
-export const Order = mongoose.model("Orders", orderSchema);
+export const Order = mongoose.model("Orders", OrderSchema);

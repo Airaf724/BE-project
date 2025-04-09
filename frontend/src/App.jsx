@@ -28,6 +28,7 @@ import "react-toastify/dist/ReactToastify.css";
 import ManageOrders from "./Admin/page/ManageOrders";
 import OrdersPage from "./pages/OrdersPage";
 import CollegeDetailsPage from "./Admin/page/CollegeDetailsPage";
+import CreateReward from "./Admin/page/CreateReward";
 
 function App() {
   const { isCheckingAuth, checkAuth, isAuthenticated, user } = useAuthStore();
@@ -68,26 +69,21 @@ function App() {
       if (isDataLoaded && !isCheckingAuth) {
         if (!isAuthenticated) {
           navigate("/login", { replace: true });
-        } else if (
-          user?.isProfileComplete === false &&
-          user?.role === "admin"
-        ) {
-          navigate("/admin/collgedetails", { replace: true });
-        } else if (
-          user?.isProfileComplete === false &&
-          user?.role === "student"
-        ) {
-          navigate("/settings", { replace: true });
-        } else if (user?.role === "admin") {
-          navigate("/admin", { replace: true });
         } else if (user?.isVerified === false) {
           navigate("/verify-email", { replace: true });
+        } else if (user?.isProfileComplete === false) {
+          if (user?.role === "admin") {
+            navigate("/admin/collgedetails", { replace: true });
+          } else if (user?.role === "student") {
+            navigate("/settings", { replace: true });
+          }
+        } else if (user?.role === "admin") {
+          navigate("/admin", { replace: true });
         }
       }
     }, [isDataLoaded, isCheckingAuth, isAuthenticated, user]);
     return children;
   };
-  // Rest of the code remains the same
 
   // Protect admin routes
   const ProtectIsAdminRoute = ({ children }) => {
@@ -206,6 +202,14 @@ function App() {
             element={
               <ProtectIsAdminRoute>
                 <ManageOrders />
+              </ProtectIsAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/addrewards"
+            element={
+              <ProtectIsAdminRoute>
+                <CreateReward />
               </ProtectIsAdminRoute>
             }
           />

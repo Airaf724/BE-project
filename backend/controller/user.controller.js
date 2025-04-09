@@ -1,8 +1,15 @@
 import { User } from "../models/user.model.js";
 import { Event } from "../models/events.model.js";
+
 export const getUsersData = async (req, res) => {
   try {
-    const users = await User.find({});
+    const { collegeId } = req.body;
+    if (!collegeId) {
+      res
+        .status(200)
+        .json({ success: false, message: "problem with fetching users" });
+    }
+    const users = await User.find({ college: collegeId });
     res.status(200).json({ success: true, data: users });
     return users;
   } catch (error) {

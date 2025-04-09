@@ -4,6 +4,7 @@ import {
   PASSWORD_RESET_REQUEST_TEMPLATE,
   PASSWORD_RESET_SUCCESS_TEMPLATE,
   VERIFICATION_COMPLETE_EMAIL,
+  SEND_ACCOUNT_DETAILS_TEMPLATE,
 } from "../mailtrap/emailTemplate.js";
 
 const transporter = nodemailer.createTransport({
@@ -85,5 +86,39 @@ export const sendPasswordResetSuccessEmail = async (email) => {
     throw new Error("Error sending password reset success email", {
       cause: error,
     });
+  }
+};
+
+export const sendCourseCredentialsToUser = async (
+  userEmail,
+  userName,
+  courseName,
+  courseImage,
+  loginEmail,
+  loginPassword,
+  loginURL
+) => {
+  try {
+    const emailContent = SEND_ACCOUNT_DETAILS_TEMPLATE.replace(
+      "{userName}",
+      userName
+    )
+      .replace("{courseName}", courseName)
+      .replace("{courseImage}", courseImage)
+      .replace("{loginEmail}", loginEmail)
+      .replace("{loginPassword}", loginPassword)
+      .replace("{loginURL}", loginURL);
+
+    await transporter.sendMail({
+      from: "Event Notifier <eventnotifieri2it@gmail.com>",
+      to: userEmail,
+      subject: "Your Course Access Details",
+      html: emailContent,
+    });
+
+    console.log("Email sent successfully");
+  } catch (error) {
+    console.error("Error sending email", error);
+    throw new Error("Error sending email", { cause: error });
   }
 };

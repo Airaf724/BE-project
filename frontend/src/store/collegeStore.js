@@ -40,7 +40,6 @@ export const useCollegeStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       const response = await axios.get(`${API_URL}/getcolleges`);
-      console.log("response", response);
       set({ colleges: response.data.colleges, loading: false });
       return response.data.colleges;
     } catch (error) {

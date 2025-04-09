@@ -6,6 +6,7 @@ import {
   getDomainEvents,
   getEventById,
   getSearchResults,
+  getEventsByAdmin,
 } from "../controller/event.controller.js";
 import { verifyToken } from "../middleware/verifyToken.js";
 import { checkAdmin } from "../middleware/checkAdmin.js";
@@ -19,4 +20,5 @@ router.post("/geteventsbyid", getEventById);
 router.get("/getdomainevents/:domain", getDomainEvents);
 router.post("/:eventId/register", registerEvent);
 router.post("/search", getSearchResults);
+router.post("/geteventsbyadmin", getEventsByAdmin);
 export default router;

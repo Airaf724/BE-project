@@ -67,22 +67,40 @@ export const createEvents = async (req, res) => {
 
 export const getEvents = async (req, res) => {
   try {
-    const { domain, sortBy, order = "asc" } = req.query;
-    const filter = domain ? { domain } : {};
-    const sortOptions = { [sortBy || "createdAt"]: order === "asc" ? 1 : -1 };
+    const { collegeId, activeTab } = req.query;
+    const { sortBy = "createdAt", order = "asc" } = req.query;
 
-    const event = await Event.find({}).sort(sortOptions);
-    if (!event) {
-      res.status(204).json({ success: false, message: "Event not found" });
+    // Validate sorting order
+    const sortOrder = order === "desc" ? -1 : 1;
+    const sortOptions = { [sortBy]: sortOrder };
+
+    let query = {};
+
+    // Only filter by college if activeTab is "college" AND collegeId exists AND is not "all"
+    if (activeTab === "college" && collegeId && collegeId !== "all") {
+      query.college = collegeId;
+    }
+    const events = await Event.find(query).sort(sortOptions);
+
+    res.status(200).json({ success: true, events });
+  } catch (error) {
+    console.error("Error in fetching events:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const getEventsByAdmin = async (req, res) => {
+  try {
+    const { adminId } = req.body;
+    if (!adminId) {
+      res.status(404).json({ success: false, message: "admin not found" });
     }
 
-    res.status(200).json({ success: true, event });
-    return event;
+    const events = await Event.find({ college: adminId });
+    res.status(200).json({ success: true, events });
   } catch (error) {
-    res
-      .status(404)
-      .json({ success: false, message: "problem with fetching events" });
-    console.log("error in fetching events", error);
+    console.error("Error in fetching events:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -123,7 +141,6 @@ export const getDomainEvents = async (req, res) => {
     });
   }
 };
-
 // export const registerEvent = async (req, res) => {
 //   try {
 //     const { eventId } = req.params;

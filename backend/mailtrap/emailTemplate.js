@@ -120,3 +120,38 @@ export const PASSWORD_RESET_REQUEST_TEMPLATE = `
 </body>
 </html>
 `;
+
+export const SEND_ACCOUNT_DETAILS_TEMPLATE = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Account Details</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background: linear-gradient(to right, #007bff, #0056b3); padding: 20px; text-align: center;">
+    <h1 style="color: white; margin: 0;">Congratulations! You can now access this course.</h1>
+  </div>
+  <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 5px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+    <p>Hello {userName},</p>
+    <p>You have been successfully enrolled in the course: <strong>{courseName}</strong>.</p>
+    <div style="text-align: center; margin: 20px 0;">
+      <img src="{courseImage}" alt="Course Image" style="max-width: 100%; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+    </div>
+    <p>Here are your login credentials:</p>
+    <p><strong>Email:</strong> {loginEmail}</p>
+    <p><strong>Password:</strong> {loginPassword}</p>
+    <p>For security reasons, please change your password after logging in.</p>
+    <p>Click the button below to log in:</p>
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="{loginURL}" style="background-color: #007bff; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Login Now</a>
+    </div>
+    <p>Best regards,<br>Your App Team</p>
+  </div>
+  <div style="text-align: center; margin-top: 20px; color: #888; font-size: 0.8em;">
+    <p>This is an automated message, please do not reply to this email.</p>
+  </div>
+</body>
+</html>
+`;
