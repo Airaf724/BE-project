@@ -35,8 +35,8 @@ const CreateEvent = () => {
     registrationReward: "",
     attendanceReward: "",
     collegeId: user?.college,
+    adminId: user?._id,
   });
-
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -68,6 +68,7 @@ const CreateEvent = () => {
       time,
       image,
       collegeId,
+      adminId,
     } = eventData;
 
     if (
@@ -79,7 +80,8 @@ const CreateEvent = () => {
       !date ||
       !time ||
       !image ||
-      !collegeId
+      !collegeId ||
+      !adminId
     ) {
       alert("Please fill in all the fields!");
       return;

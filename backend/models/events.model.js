@@ -8,7 +8,7 @@ const EventSchema = new mongoose.Schema(
     },
     domain: {
       type: String,
-      required: true, // such as sports , technical , clutural
+      required: true, // such as sports, technical, cultural
     },
     description: {
       type: String,
@@ -16,7 +16,7 @@ const EventSchema = new mongoose.Schema(
     },
     location: {
       type: String,
-      required: true, // class room number cc or ppcrc or college name
+      required: true, // classroom number, PPCRC, college name, etc.
     },
     event_date: {
       type: Date,
@@ -24,11 +24,11 @@ const EventSchema = new mongoose.Schema(
     },
     event_time: {
       type: String,
-      required: false, // 10:00 am, 2:00 pm, 6:00 pm etc.
+      required: false, // e.g. 10:00 am, 2:00 pm
     },
     community: {
       type: String,
-      required: true, // gdsc , ITSA , CASA
+      required: true, // GDSC, ITSA, CASA
     },
     isOpen: {
       type: Boolean,
@@ -36,19 +36,30 @@ const EventSchema = new mongoose.Schema(
     },
     registered: [
       {
-        type: mongoose.Schema.Types.ObjectId, // who join the event  or regitser it
+        type: mongoose.Schema.Types.ObjectId, // users who registered
         ref: "User",
       },
     ],
     attendees: [],
     image_url: {
-      type: String, // default image url if not provided by user.
+      type: String, // default image URL if not provided
     },
-    registrationReward: { type: Number, default: 0 }, // Points for registering
-    attendanceReward: { type: Number, default: 0 }, // Points for attending
+    registrationReward: {
+      type: Number,
+      default: 0,
+    },
+    attendanceReward: {
+      type: Number,
+      default: 0,
+    },
     college: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "College",
+      required: true,
+    },
+    adminId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
   },
@@ -56,8 +67,3 @@ const EventSchema = new mongoose.Schema(
 );
 
 export const Event = mongoose.model("Events", EventSchema);
-
-// event_time: {
-//   type: String,
-//   required: true,
-// },

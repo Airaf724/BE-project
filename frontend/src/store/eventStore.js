@@ -117,6 +117,9 @@ export const useEventStore = create((set) => ({
       if (eventData.collegeId) {
         formData.append("collegeId", eventData.collegeId);
       }
+      if (eventData.adminId) {
+        formData.append("adminId", eventData.adminId);
+      }
 
       if (eventData.image) {
         formData.append("image", eventData.image);
@@ -161,6 +164,61 @@ export const useEventStore = create((set) => ({
         domainEvents: [], // Reset to empty array on error
       });
       console.error(error);
+    }
+  },
+
+  updateEvent: async (eventId, eventData) => {
+    set({ isLoading: true, error: null, updateSuccess: false });
+    try {
+      const response = await axios.put(
+        `${API_URL}/updateevent/${eventId}`,
+        eventData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      // Update events list and current event
+      set((state) => ({
+        events: state.events.map((event) =>
+          event.id === eventId ? response.data : event
+        ),
+        event: response.data,
+        isLoading: false,
+        updateSuccess: true,
+      }));
+      return response.data;
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to update event",
+        isLoading: false,
+      });
+      return null;
+    }
+  },
+  resetEventStatus: () => {
+    set({
+      error: null,
+      updateSuccess: false,
+    });
+  },
+
+  deleteEvent: async (id) => {
+    try {
+      set({ loading: true, error: null });
+      await axios.delete(`${API_URL}/deleteevent/${id}`);
+      set({
+        events: get().events.filter((event) => event._id !== id),
+        loading: false,
+      });
+      return id;
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to delete event",
+        loading: false,
+      });
     }
   },
 }));

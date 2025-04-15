@@ -29,7 +29,9 @@ import ManageOrders from "./Admin/page/ManageOrders";
 import OrdersPage from "./pages/OrdersPage";
 import CollegeDetailsPage from "./Admin/page/CollegeDetailsPage";
 import CreateReward from "./Admin/page/CreateReward";
-
+import AdminEventsPage from "./pages/AdminEventsPage";
+import EditEventPage from "./Admin/page/EditEventPage";
+import ManageRewards from "./Admin/page/ManageRewards";
 function App() {
   const { isCheckingAuth, checkAuth, isAuthenticated, user } = useAuthStore();
   const navigate = useNavigate();
@@ -171,12 +173,22 @@ function App() {
             path="/admin"
             element={
               <ProtectIsAdminRoute>
+                {/* <AdminDashboard /> */}
+                <AdminEventsPage />
+              </ProtectIsAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/manage_event_attendence"
+            element={
+              <ProtectIsAdminRoute>
                 <AdminDashboard />
               </ProtectIsAdminRoute>
             }
           />
           <Route path="/events/:domain" element={<EventPage />} />
           <Route path="/event/:event-id" element={<EventDetailPage />} />
+          <Route path="/edit-event/:eventId" element={<EditEventPage />} />
           {/* Admin routes */}
           <Route path="/:user_id/my-lists" element={<UserList />} />
           <Route path="/:user_id/submissions" element={<UserSubmissions />} />
@@ -210,6 +222,14 @@ function App() {
             element={
               <ProtectIsAdminRoute>
                 <CreateReward />
+              </ProtectIsAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/managerewards"
+            element={
+              <ProtectIsAdminRoute>
+                <ManageRewards />
               </ProtectIsAdminRoute>
             }
           />

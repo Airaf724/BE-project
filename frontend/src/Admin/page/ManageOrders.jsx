@@ -124,11 +124,7 @@ const ManageOrders = () => {
                       </label>
                       <input
                         type="email"
-                        value={
-                          credentials[order._id]?.email ||
-                          order.credentials?.email ||
-                          ""
-                        }
+                        value={credentials[order._id]?.email || ""}
                         onChange={(e) =>
                           handleCredentialChange(
                             order._id,

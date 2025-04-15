@@ -7,6 +7,8 @@ const ManageEventAttendees = () => {
   const [users, setUsers] = useState([]);
   const [statusMap, setStatusMap] = useState({}); // Track status of users
   const { event, fetchEventById } = useEventStore();
+  const [rewardInputVisible, setRewardInputVisible] = useState(null); // Track visible input by userId
+  const [rewardAmountMap, setRewardAmountMap] = useState({});
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -99,9 +101,63 @@ const ManageEventAttendees = () => {
                 </select>
               </td>
               <td className="py-3 px-4 border text-center">
-                <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">
-                  Give Reward
-                </button>
+                <div className="flex flex-col items-center gap-2">
+                  <button
+                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
+                    onClick={() =>
+                      setRewardInputVisible((prev) =>
+                        prev === user._id ? null : user._id
+                      )
+                    }
+                  >
+                    Give Reward
+                  </button>
+
+                  {rewardInputVisible === user._id && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="Reward"
+                        value={rewardAmountMap[user._id] || ""}
+                        onChange={(e) =>
+                          setRewardAmountMap((prev) => ({
+                            ...prev,
+                            [user._id]: e.target.value,
+                          }))
+                        }
+                        className="border px-2 py-1 w-20 rounded"
+                      />
+                      <button
+                        onClick={async () => {
+                          try {
+                            await axios.post(
+                              "http://localhost:5000/api/users/giveReward",
+                              {
+                                userId: user._id,
+                                eventId,
+                                rewardAmount: rewardAmountMap[user._id],
+                              }
+                            );
+                            alert("Reward given successfully!");
+                            setRewardInputVisible(null); // Hide input after submission
+                            setRewardAmountMap((prev) => ({
+                              ...prev,
+                              [user._id]: "",
+                            }));
+                          } catch (err) {
+                            console.error("Error giving reward:", err);
+                            alert("Failed to give reward");
+                          }
+                        }}
+                        className="text-green-600 hover:text-green-800"
+                        title="Submit Reward"
+                      >
+                        ✅
+                      </button>
+                    </div>
+                  )}
+                </div>
               </td>
             </tr>
           ))}

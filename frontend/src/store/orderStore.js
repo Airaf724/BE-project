@@ -25,6 +25,7 @@ export const useOrderStore = create((set) => ({
         courseName,
         coursePoints,
         courseLink,
+        courseImage,
         credentials,
       } = orderData;
 
@@ -40,6 +41,7 @@ export const useOrderStore = create((set) => ({
         courseName,
         coursePoints,
         courseLink,
+        courseImage,
         credentials: {
           email: credentials?.email || "",
         },

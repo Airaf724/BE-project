@@ -53,9 +53,11 @@ const Item = ({ event, handleRegistration, userId, disabled }) => {
       </Link>
 
       <div className="h-[125px] p-4 border-b">
-        <h3 className="font-bold text-lg text-gray-800 mb-2">{event.name}</h3>
+        <h3 className="font-bold text-lg text-gray-800 mb-2">
+          {truncateText(event.name, 7)}
+        </h3>
         <p className="text-sm text-gray-600 line-clamp-2">
-          Techfest presents{" "}
+          {" "}
           {truncateText(event.description, 5) ||
             "Join us for an amazing event filled with innovation and technology"}
         </p>

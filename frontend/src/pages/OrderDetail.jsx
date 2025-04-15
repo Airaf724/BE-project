@@ -26,7 +26,7 @@ const OrderDetail = () => {
     };
     setSelectedCourse(course);
   }, [location]);
-
+  console.log("selected course", selectedCourse);
   const handleRedeem = async () => {
     if (!selectedCourse) {
       toast.error("Course information is missing.");
@@ -60,6 +60,7 @@ const OrderDetail = () => {
       courseName: selectedCourse.title,
       coursePoints: Number(selectedCourse.points),
       courseLink: selectedCourse.link,
+      courseImage: selectedCourse.image,
       credentials: {
         email: deliveryEmail,
       },

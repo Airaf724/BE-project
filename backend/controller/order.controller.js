@@ -13,6 +13,7 @@ export const placeOrder = async (req, res) => {
       courseName,
       coursePoints,
       courseLink,
+      courseImage,
       credentials,
     } = req.body;
 
@@ -23,7 +24,8 @@ export const placeOrder = async (req, res) => {
       !userEmail ||
       !rewardId ||
       !courseName ||
-      !coursePoints
+      !coursePoints ||
+      !courseImage
     ) {
       return res.status(400).json({
         success: false,
@@ -40,6 +42,9 @@ export const placeOrder = async (req, res) => {
       courseName,
       coursePoints,
       courseLink: courseLink || "pending_assignment",
+      courseImage:
+        courseImage ||
+        "https://www.istockphoto.com/photo/happy-business-leader-talking-to-group-of-his-colleagues-on-a-seminar-in-board-room-gm2116544916-567259943?utm_source=pixabay&utm_medium=affiliate&utm_campaign=sponsored_image&utm_content=srp_topbanner_media&utm_term=training+course",
       credentials: {
         email: credentials?.email || "",
         password: "", // Will be filled by admin later

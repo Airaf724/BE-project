@@ -14,7 +14,7 @@ const EventDetailPage = () => {
   const [registrationInProgress, setRegistrationInProgress] = useState(false);
   const userId = user._id;
   const isRegistered = userId && event?.registered?.includes(userId);
-
+  const isAdmin = user?.role === "admin";
   useEffect(() => {
     fetchEventById(eventId); // replace with actual event ID
   }, []);
@@ -102,21 +102,27 @@ const EventDetailPage = () => {
             </div>
           </div>
 
-          <div className="flex justify-center w-full ">
-            <button
-              onClick={() => handleRegistration()}
-              disabled={disabled || isRegistered}
-              className={`w-full py-2 px-4 rounded ${
-                isRegistered
-                  ? "bg-green-500 text-white cursor-not-allowed"
+          {!isAdmin && (
+            <div className="flex justify-center w-full ">
+              <button
+                onClick={() => handleRegistration()}
+                disabled={disabled || isRegistered}
+                className={`w-full py-2 px-4 rounded ${
+                  isRegistered
+                    ? "bg-green-500 text-white cursor-not-allowed"
+                    : disabled
+                    ? "bg-gray-300 cursor-not-allowed"
+                    : "bg-orange-500 hover:bg-orange-500 text-white"
+                }`}
+              >
+                {isRegistered
+                  ? "Done"
                   : disabled
-                  ? "bg-gray-300 cursor-not-allowed"
-                  : "bg-orange-500 hover:bg-orange-500 text-white"
-              }`}
-            >
-              {isRegistered ? "Done" : disabled ? "Processing..." : "Register"}
-            </button>
-          </div>
+                  ? "Processing..."
+                  : "Register"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

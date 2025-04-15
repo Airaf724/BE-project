@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { Event } from "../models/events.model.js";
 import { uploadOnCloudinary } from "../utitls/cloudinary.js";
 import { User } from "../models/user.model.js";
-
+import { College } from "../models/college.model.js";
 export const createEvents = async (req, res) => {
   console.log("Request body:", req.body);
   console.log("Request file:", req.file);
@@ -18,6 +18,7 @@ export const createEvents = async (req, res) => {
       registrationReward,
       attendanceReward,
       collegeId,
+      adminId,
     } = req.body;
 
     if (!collegeId) {
@@ -28,6 +29,11 @@ export const createEvents = async (req, res) => {
     }
 
     if (!mongoose.Types.ObjectId.isValid(collegeId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid college ID" });
+    }
+    if (!mongoose.Types.ObjectId.isValid(adminId)) {
       return res
         .status(400)
         .json({ success: false, message: "Invalid college ID" });
@@ -50,6 +56,7 @@ export const createEvents = async (req, res) => {
       registrationReward,
       attendanceReward,
       college: new mongoose.Types.ObjectId(collegeId),
+      adminId: new mongoose.Types.ObjectId(adminId),
     });
 
     await event.save();
@@ -93,10 +100,13 @@ export const getEventsByAdmin = async (req, res) => {
   try {
     const { adminId } = req.body;
     if (!adminId) {
-      res.status(404).json({ success: false, message: "admin not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Admin ID is required" });
     }
 
-    const events = await Event.find({ college: adminId });
+    const events = await Event.find({ adminId });
+
     res.status(200).json({ success: true, events });
   } catch (error) {
     console.error("Error in fetching events:", error);
@@ -322,5 +332,110 @@ export const getSearchResults = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Server Error", error });
+  }
+};
+
+export const updateEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid event ID" });
+    }
+
+    const event = await Event.findById(id);
+
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    // Check if user is authorized to update this event
+    if (
+      event.createdBy.toString() !== req.user._id.toString() &&
+      req.user.role !== "admin"
+    ) {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to update this event" });
+    }
+
+    // Process image upload if needed
+    let image_url = event.image_url;
+    if (req.file) {
+      const newImageUrl = await uploadOnCloudinary(req.file.path);
+      if (newImageUrl) {
+        image_url = newImageUrl;
+      }
+    }
+
+    // Update event data
+    const updatedData = {
+      name: req.body.name || event.name,
+      description: req.body.description || event.description,
+      domain: req.body.domain || event.domain,
+      location: req.body.location || event.location,
+      event_date: req.body.event_date || event.event_date,
+      event_time: req.body.event_time || event.event_time,
+      isOpen:
+        req.body.isOpen !== undefined
+          ? req.body.isOpen === "true"
+          : event.isOpen,
+      image_url,
+      registrationReward:
+        req.body.registrationReward !== undefined
+          ? Number(req.body.registrationReward)
+          : event.registrationReward,
+      attendanceReward:
+        req.body.attendanceReward !== undefined
+          ? Number(req.body.attendanceReward)
+          : event.attendanceReward,
+    };
+
+    const updatedEvent = await Event.findByIdAndUpdate(id, updatedData, {
+      new: true,
+    });
+
+    res.status(200).json(updatedEvent);
+  } catch (error) {
+    console.error("Error updating event:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to update event", error: error.message });
+  }
+};
+
+// Delete event
+export const deleteEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid event ID" });
+    }
+
+    const event = await Event.findById(id);
+
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    // Convert string ID to ObjectId before using in updateMany
+    const objectId = new mongoose.Types.ObjectId(id);
+
+    // Remove the event ID from registeredEvents array of all users who registered
+    await User.updateMany(
+      { registeredEvents: objectId },
+      { $pull: { registeredEvents: objectId } }
+    );
+
+    // Delete the event
+    await Event.findByIdAndDelete(id);
+
+    res.status(200).json({ id, message: "Event deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting event:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to delete event", error: error.message });
   }
 };

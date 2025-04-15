@@ -34,6 +34,10 @@ const OrderSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    courseImage: {
+      type: String,
+      required: true,
+    },
     credentials: {
       email: {
         type: String,

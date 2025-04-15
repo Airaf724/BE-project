@@ -9,9 +9,9 @@ const AdminDashboard = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const { user } = useAuthStore();
   const collegeId = user?.college;
-
+  const adminId = user?._id;
   useEffect(() => {
-    fetchEventsByAdmin(collegeId);
+    fetchEventsByAdmin(adminId);
   }, []);
 
   const PAGE_SIZE = 6;

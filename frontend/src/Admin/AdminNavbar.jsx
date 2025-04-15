@@ -55,6 +55,15 @@ const AdminNavbar = () => {
             </li>
             <li>
               <Link
+                to="/admin/manage_event_attendence"
+                className="block py-2 px-4 hover:bg-gray-700"
+                onClick={() => setIsOpen(false)}
+              >
+                Manage Attendence
+              </Link>
+            </li>
+            <li>
+              <Link
                 to="/admin/mange"
                 className="block py-2 px-4 hover:bg-gray-700"
                 onClick={() => setIsOpen(false)}
@@ -78,6 +87,15 @@ const AdminNavbar = () => {
                 onClick={() => setIsOpen(false)}
               >
                 Add Rewards
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/admin/managerewards"
+                className="block py-2 px-4 hover:bg-gray-700"
+                onClick={() => setIsOpen(false)}
+              >
+                Manage Rewards
               </Link>
             </li>
           </ul>
