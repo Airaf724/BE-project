@@ -237,6 +237,7 @@ function App() {
             }
           />
           <Route path="/placeorder" element={<OrderDetail />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
       <Footer />

@@ -12,8 +12,6 @@ import {
   sendPasswordResetSuccessEmail,
 } from "../nodemailer/nodemailer.js";
 
-const clientUrl = process.env.CLIENT_URL;
-
 export const signup = async (req, res) => {
   const { email, password, name, role } = req.body;
 

@@ -13,11 +13,12 @@ import cors from "cors";
 import path from "path";
 dotenv.config();
 const app = express();
+const __dirname = path.resolve();
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 const PORT = process.env.PORT || 5000;
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
+// const __dirname = path.dirname(new URL(import.meta.url).pathname);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/auth", authroutes);
 app.use("/api/events", eventroutes);
@@ -26,6 +27,14 @@ app.use("/api/orders", orderroutes);
 app.use("/api/colleges", collegeroutes);
 app.use("/api/rewards", rewardroutes);
 app.use("/api/attendance", attendanceroutes);
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "./frontend/dist")));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
+  });
+}
 app.listen(PORT, () => {
   connectDb();
   console.log("server started at port ", PORT);
