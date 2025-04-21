@@ -5,15 +5,18 @@ import {
   PASSWORD_RESET_SUCCESS_TEMPLATE,
   VERIFICATION_COMPLETE_EMAIL,
   SEND_ACCOUNT_DETAILS_TEMPLATE,
+  SUBSCRIBE_NEWSLETTER_TEMPLATE,
 } from "../mailtrap/emailTemplate.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
   secure: true,
   auth: {
-    user: "eventnotifieri2it@gmail.com",
-    pass: "mfznlnyoilkjopgu",
+    user: process.env.EMAIL,
+    pass: process.env.EMAIL_PASS,
   },
 });
 
@@ -120,5 +123,26 @@ export const sendCourseCredentialsToUser = async (
   } catch (error) {
     console.error("Error sending email", error);
     throw new Error("Error sending email", { cause: error });
+  }
+};
+
+export const sendSubscriptionMailToUser = async (email, userName) => {
+  try {
+    const htmlContent = SUBSCRIBE_NEWSLETTER_TEMPLATE.replace(
+      "{userName}",
+      userName
+    ).replace("{unsubscribeURL}", "https://yourapp.com/unsubscribe");
+
+    await transporter.sendMail({
+      from: "Event Notifier <eventnotifieri2it@gmail.com>",
+      to: email,
+      subject: "Welcome to Our Platform",
+      html: htmlContent,
+    });
+
+    console.log("Welcome email sent successfully");
+  } catch (error) {
+    console.error("Error sending welcome email", error);
+    throw new Error("Error sending welcome email", { cause: error });
   }
 };

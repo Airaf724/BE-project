@@ -1,6 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
+import { useUserStore } from "../store/userStore";
+import { toast } from "react-toastify";
 
 const NewsLetter = () => {
+  const [email, setEmail] = useState("");
+  const { subscribeNewsletter } = useUserStore();
+  const { user } = useUserStore();
+
+  const handleSubmit = async () => {
+    if (!email) return alert("Please enter an email address.");
+
+    try {
+      await subscribeNewsletter(email, user?.name);
+      toast.success("Successfully subscribed to the newsletter!");
+      setEmail(""); // Reset input
+    } catch (error) {
+      toast.error("Failed to subscribe. Please try again.");
+    }
+  };
+
   return (
     <div
       className="w-[95%] h-[45vh] flex flex-col items-center justify-center mx-auto px-[140px] mb-[150px] gap-[30px] bg-gradient-to-b from-[#fde1ff] to-[#e1ffea22]
@@ -37,6 +55,8 @@ const NewsLetter = () => {
         <input
           type="email"
           placeholder="Your Email id"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           className="w-[500px] ml-[30px] border-none outline-none text-[#616161] text-[16px] font-['Poppins']
             max-[1280px]:w-[400px]
             max-[1024px]:w-[400px]
@@ -44,6 +64,7 @@ const NewsLetter = () => {
             max-[500px]:w-[130px]"
         />
         <button
+          onClick={handleSubmit}
           className="w-[150px] h-[50px] rounded-[80px] bg-black text-white cursor-pointer text-[16px]
           max-[1280px]:w-[140px]
           max-[1024px]:w-[120px] max-[1024px]:h-[40px]

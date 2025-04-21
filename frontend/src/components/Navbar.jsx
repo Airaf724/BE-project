@@ -15,19 +15,24 @@ import NotificationsDropdown from "./NotificationsDropdown ";
 import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, isAuthenticated, logout, checkAuth } = useAuthStore();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const profileRef = useRef(null);
   const storeRef = useRef(null);
   const [Showstore, setShowstore] = useState(false);
   const navigate = useNavigate();
+
   const handleLogout = () => {
     logout();
     navigate("/login");
     setIsProfileOpen(false);
   };
-
+  useEffect(() => {
+    if (!user) {
+      checkAuth();
+    }
+  }, [user]);
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {

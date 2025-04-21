@@ -165,7 +165,6 @@ const EditEventPage = () => {
       </div>
 
       {/* Display event ID for debugging */}
-      <p className="text-sm text-gray-500 mb-4">Editing event ID: {eventId}</p>
 
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -238,13 +237,10 @@ const EditEventPage = () => {
               required
             >
               <option value="">Select Domain</option>
-              <option value="Technology">Technology</option>
-              <option value="Business">Business</option>
-              <option value="Arts">Arts</option>
-              <option value="Science">Science</option>
-              <option value="Health">Health</option>
-              <option value="Education">Education</option>
+              <option value="Technical">Technology</option>
               <option value="Sports">Sports</option>
+              <option value="cultural">Cultural</option>
+              <option value="competitions">Competition</option>
               <option value="Other">Other</option>
             </select>
           </div>
@@ -301,7 +297,7 @@ const EditEventPage = () => {
               Time
             </label>
             <input
-              type="time"
+              type="text"
               name="event_time"
               value={formData.event_time}
               onChange={handleChange}

@@ -5,7 +5,8 @@ export const addReward = async (req, res) => {
   console.log("Request body:", req.body);
   console.log("Request file:", req.file);
   try {
-    const { name, description, courseLink, price, category, level } = req.body;
+    const { name, description, courseLink, price, category, level, point } =
+      req.body;
 
     let imageUrl = "";
     if (req.file) {
@@ -19,6 +20,7 @@ export const addReward = async (req, res) => {
       price,
       category,
       level,
+      points: point,
       image: imageUrl, // Store Cloudinary image URL
     });
 

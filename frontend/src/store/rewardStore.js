@@ -23,6 +23,7 @@ export const useRewardStore = create((set) => ({
       formData.append("price", eventData.price);
       formData.append("category", eventData.category);
       formData.append("level", eventData.difficulty);
+      formData.append("point", eventData.points);
 
       if (eventData.image) {
         formData.append("image", eventData.image);

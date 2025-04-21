@@ -349,16 +349,6 @@ export const updateEvent = async (req, res) => {
       return res.status(404).json({ message: "Event not found" });
     }
 
-    // Check if user is authorized to update this event
-    if (
-      event.createdBy.toString() !== req.user._id.toString() &&
-      req.user.role !== "admin"
-    ) {
-      return res
-        .status(403)
-        .json({ message: "Not authorized to update this event" });
-    }
-
     // Process image upload if needed
     let image_url = event.image_url;
     if (req.file) {

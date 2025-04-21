@@ -1,6 +1,6 @@
 import { User } from "../models/user.model.js";
 import { Event } from "../models/events.model.js";
-
+import { sendSubscriptionMailToUser } from "../nodemailer/nodemailer.js";
 export const getUsersData = async (req, res) => {
   try {
     const { collegeId } = req.body;
@@ -106,6 +106,26 @@ export const setProfile = async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating profile:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const sendSubscriptionMail = async (req, res) => {
+  try {
+    const { email, userName } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required." });
+    }
+
+    await sendSubscriptionMailToUser(email, userName || "");
+
+    res.status(200).json({
+      success: true,
+      message: "Mail sent successfully",
+    });
+  } catch (error) {
+    console.error("Error sending subscription email:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

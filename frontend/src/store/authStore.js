@@ -59,18 +59,18 @@ export const useAuthStore = create((set, get) => ({
       if (response?.data?.user) {
         // Update user first, then authentication state
         set({
-          user: response.data.user,
+          user: response?.data?.user,
           isAuthenticated: true,
           error: null,
           isLoading: false,
         });
-
         // Double-check that user state was properly updated
         const currentUser = get().user;
         if (!currentUser) {
           // If user is still null, manually trigger another check
           await get().checkAuth();
         }
+        console.log("login store", user);
 
         // return response.data;
       } else {
@@ -82,6 +82,35 @@ export const useAuthStore = create((set, get) => ({
         isLoading: false,
       });
       throw error;
+    }
+  },
+  checkAuth: async () => {
+    set({ isCheckingAuth: true, error: null });
+    try {
+      const response = await axios.get(`${API_URL}/check-auth`);
+      if (response?.data?.success && response?.data?.user) {
+        set({
+          user: response.data.user,
+          isAuthenticated: true,
+          error: null,
+        });
+        // return response.data;
+      } else {
+        set({
+          user: null,
+          isAuthenticated: false,
+        });
+        console.log("Auth check: No valid user data in response");
+      }
+    } catch (error) {
+      console.error("Auth check error:", error);
+      set({
+        user: null,
+        isAuthenticated: false,
+        error: error.response?.data?.message || error.message,
+      });
+    } finally {
+      set({ isCheckingAuth: false });
     }
   },
 
@@ -122,37 +151,6 @@ export const useAuthStore = create((set, get) => ({
         isLoading: false,
       });
       throw error;
-    }
-  },
-
-  checkAuth: async () => {
-    set({ isCheckingAuth: true, error: null });
-    try {
-      const response = await axios.get(`${API_URL}/check-auth`);
-      // Check if we have the correct user data structure
-      if (response?.data?.success && response?.data?.user) {
-        set({
-          user: response.data.user,
-          isAuthenticated: true,
-          error: null,
-        });
-        // return response.data;
-      } else {
-        set({
-          user: null,
-          isAuthenticated: false,
-        });
-        console.log("Auth check: No valid user data in response");
-      }
-    } catch (error) {
-      console.error("Auth check error:", error);
-      set({
-        user: null,
-        isAuthenticated: false,
-        error: error.response?.data?.message || error.message,
-      });
-    } finally {
-      set({ isCheckingAuth: false });
     }
   },
 

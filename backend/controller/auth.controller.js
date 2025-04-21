@@ -85,38 +85,6 @@ export const verifyEmail = async (req, res) => {
   }
 };
 
-export const login = async (req, res) => {
-  const { email, password } = req.body;
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "user not exits " });
-    }
-
-    const isPasswordValid = await bcryptjs.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      return res
-        .status(401)
-        .json({ success: false, message: "incrrect password try again" });
-    }
-    generateTokenAndSetcookies(res, user._id);
-    user.lastloginDate = Date.now();
-    await user.save();
-    res.status(200).json({
-      success: true,
-      message: "Logged in successfully",
-      user: { ...user, password: null },
-    });
-    return user;
-  } catch (e) {
-    console.log(e.message);
-    res.status(404).json({ success: false, message: "Couldn't login" });
-  }
-};
-
 export const logout = async (req, res) => {
   res.clearCookie("token");
   res.status(200).json({ success: true, message: "Logged out" });
@@ -184,6 +152,40 @@ export const resetPassword = async (req, res) => {
     res
       .status(400)
       .json({ success: false, message: `someError ,,, ${error.message} ` });
+  }
+};
+
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "user not exits " });
+    }
+
+    const isPasswordValid = await bcryptjs.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      return res
+        .status(401)
+        .json({ success: false, message: "incrrect password try again" });
+    }
+    generateTokenAndSetcookies(res, user._id);
+    user.lastloginDate = Date.now();
+    await user.save();
+    const userData = user.toObject();
+    delete userData.password;
+
+    res.status(200).json({
+      success: true,
+      message: "Logged in successfully",
+      user: userData,
+    });
+  } catch (e) {
+    console.log(e.message);
+    res.status(404).json({ success: false, message: "Couldn't login" });
   }
 };
 

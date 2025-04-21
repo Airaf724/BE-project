@@ -40,7 +40,11 @@ function App() {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        await checkAuth();
+        const timer = setTimeout(async () => {
+          await checkAuth();
+        }, 100);
+
+        return () => clearTimeout(timer);
       } finally {
         setIsDataLoaded(true);
       }
@@ -64,7 +68,6 @@ function App() {
     return <LoadingSpinner />;
   };
 
-  // Protect routes that require authentication
   // Protect routes that require authentication
   const ProtectedRoutes = ({ children }) => {
     useEffect(() => {

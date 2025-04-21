@@ -10,7 +10,6 @@ const AdminEventsPage = () => {
   useEffect(() => {
     fetchEventsByAdmin(user?._id);
   }, []);
-  console.log(events);
   return (
     <div className="p-6 ml-[260px]">
       {" "}
@@ -18,7 +17,7 @@ const AdminEventsPage = () => {
       <h1 className="text-2xl font-bold mb-6">Your Created Events</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {events.map((event) => (
-          <EventCard key={event.id} event={event} />
+          <EventCard key={event?._id} event={event} />
         ))}
       </div>
     </div>

@@ -68,7 +68,7 @@ const AdminNavbar = () => {
                 className="block py-2 px-4 hover:bg-gray-700"
                 onClick={() => setIsOpen(false)}
               >
-                Manage
+                Manage Students
               </Link>
             </li>
             <li>

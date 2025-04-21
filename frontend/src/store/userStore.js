@@ -41,6 +41,22 @@ export const useUserStore = create((set) => ({
     }
   },
 
+  subscribeNewsletter: async (email, userName) => {
+    try {
+      console.log("userName", userName);
+      const response = await axios.post(`${API_URL}/newsletter`, {
+        email,
+        userName,
+      });
+      console.log("Subscribed successfully:", response.data);
+    } catch (error) {
+      console.error(
+        "Subscription failed:",
+        error.response?.data || error.message
+      );
+    }
+  },
+
   // deleteUser: async (id) => {
   //     set({ isLoading: true, error: null });
   //     try {

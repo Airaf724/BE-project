@@ -1,3 +1,4 @@
+// models/events.model.js
 import mongoose from "mongoose";
 
 const EventSchema = new mongoose.Schema(
@@ -40,7 +41,35 @@ const EventSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
-    attendees: [],
+    attendees: [
+      {
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        timestamp: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+    // QR code fields (now removed)
+    // qrCodeToken: {
+    //   type: String,
+    //   default: null,
+    // },
+    // qrTokenExpiry: {
+    //   type: Date,
+    //   default: null,
+    // },
+    attendanceCode: {
+      type: String,
+      default: null,
+    },
+    attendanceCodeExpiry: {
+      type: Date,
+      default: null,
+    },
     image_url: {
       type: String, // default image URL if not provided
     },
