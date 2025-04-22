@@ -14,7 +14,15 @@ const Offers = () => {
         <p className="text-[30px] font-semibold text-[#171717] mt-[30px]">
           Save Your Seat Now!!
         </p>
-        <button className="w-[262px] h-[50px] rounded-[35px] bg-[#ff4141] text-white text-[22px] font-medium mt-[30px] cursor-pointer">
+        <button
+          className="w-[262px] h-[50px] rounded-[35px] bg-[#ff4141] text-white text-[22px] font-medium mt-[30px] cursor-pointer"
+          onClick={() => {
+            const element = document.getElementById("popular-events");
+            if (element) {
+              element.scrollIntoView({ behavior: "smooth" });
+            }
+          }}
+        >
           Book Now!!
         </button>
       </div>

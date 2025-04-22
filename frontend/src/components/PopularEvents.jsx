@@ -63,7 +63,10 @@ const PopularEvents = () => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-[10px] mb-[100px]">
+    <div
+      id="popular-events"
+      className="flex flex-col items-center gap-[10px] mb-[100px]"
+    >
       <div className="w-full max-w-7xl px-4">
         <h1 className="text-4xl md:text-5xl font-semibold text-center text-[#171717] mb-4">
           Popular Events

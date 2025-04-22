@@ -88,7 +88,15 @@ const Hero = () => {
             Register Now!
           </p>
         </div>
-        <div className="flex items-center justify-start gap-4 mt-8 w-[200px] h-[50px] rounded-full bg-[#ff4141] text-white text-xl font-medium cursor-pointer">
+        <div
+          className="flex items-center justify-start gap-4 mt-8 w-[200px] h-[50px] rounded-full bg-[#ff4141] text-white text-xl font-medium cursor-pointer"
+          onClick={() => {
+            const element = document.getElementById("popular-events");
+            if (element) {
+              element.scrollIntoView({ behavior: "smooth" });
+            }
+          }}
+        >
           <div className="ml-4">Latest Events</div>
           <img src={arrow_icon} alt="Arrow" />
         </div>

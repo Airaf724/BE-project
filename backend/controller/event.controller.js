@@ -327,7 +327,15 @@ export const getSearchResults = async (req, res) => {
   try {
     const { name } = req.query;
     let query = {};
-    if (name) query.name = { $regex: `^${req.query.name}`, $options: "i" };
+
+    if (name) {
+      // Check if the first letter is an emoji or unwanted character, and remove it
+      const sanitizedName = name.slice(1); // Remove the first character
+
+      // If sanitized name exists after removing the first character, perform a regex match anywhere in the string
+      query.name = { $regex: sanitizedName, $options: "i" }; // 'i' for case-insensitive matching
+    }
+
     const events = await Event.find(query);
     res.status(200).json({ success: true, events });
     return events;

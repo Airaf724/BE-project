@@ -78,7 +78,7 @@ const EventDetailPage = () => {
       setRegistrationInProgress(true);
       const response = await registerForEvent(eventId, userId);
 
-      if (response.status === "Registered") {
+      if (response.status === "registered") {
         toast.success("Successfully registered for event!");
         setEvent({
           ...event,

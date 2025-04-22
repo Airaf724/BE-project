@@ -161,7 +161,6 @@ export const giveRewardTOUser = async (req, res) => {
         message: "User not found",
       });
     }
-
     // Find the event
     const event = await Event.findById(eventId);
     if (!event) {
@@ -184,7 +183,7 @@ export const giveRewardTOUser = async (req, res) => {
     }
 
     // Add reward to user's balance
-    user.rewardBalance = (user.rewardBalance || 0) + reward;
+    user.points = (user.points || 0) + reward;
 
     // Log the reward in transaction history
     user.rewardTransactions = user.rewardTransactions || [];
