@@ -42,6 +42,31 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
+    notifications: [
+      {
+        message: {
+          type: String,
+          required: true,
+        },
+        type: {
+          type: String,
+          enum: ["info", "success", "warning", "error"],
+          default: "info",
+        },
+        isRead: {
+          type: Boolean,
+          default: false,
+        },
+        link: {
+          type: String,
+          default: null,
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
     points: {
       type: Number,
       default: 0,

@@ -7,8 +7,8 @@ const CoinDialog = ({ isOpen, registrationReward, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white w-[500px] p-6 rounded-lg shadow-lg relative flex flex-col items-center">
-        <h2 className="text-xl font-bold text-green-600 mb-4">
+      <div className="bg-white w-[90%] sm:w-[500px] p-6 rounded-lg shadow-lg relative flex flex-col items-center">
+        <h2 className="text-xl font-bold text-green-600 mb-4 text-center">
           {` Congratulations🎉! You have earned ${registrationReward} points`}
         </h2>
         <motion.img

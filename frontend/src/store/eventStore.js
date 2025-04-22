@@ -53,6 +53,7 @@ export const useEventStore = create((set) => ({
       const response = await axios.post(`${API_URL}/geteventsbyid`, {
         id: eventId,
       });
+      console.log(response);
       set({ event: response.data.event, isLoading: false });
     } catch (error) {
       set({ error: "Error fetching events", isLoading: false });

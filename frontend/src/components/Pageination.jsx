@@ -8,14 +8,14 @@ const Pageination = ({
   handlePrevPageChange,
 }) => {
   return (
-    <div className="fixed top-[500px] left-1/2 p-4 ">
-      <div className="flex p-2 justify-center items-center ">
+    <div className="fixed top-[500px] left-1/2 p-4 transform -translate-x-1/2">
+      <div className="flex flex-wrap justify-center items-center space-x-2 sm:space-x-4">
         <button
           disabled={currentPage === 0}
           onClick={() => handlePrevPageChange()}
-          className={` ${
+          className={`${
             currentPage === 0 ? "hidden" : ""
-          } text-2xl p-5 m-4 text-black hover:text-gray-900 hover:border-gray-400`}
+          } text-2xl sm:text-3xl p-3 sm:p-5 m-2 text-black hover:text-gray-900 hover:border-gray-400`}
         >
           ◀
         </button>
@@ -23,18 +23,18 @@ const Pageination = ({
           <button
             onClick={() => handlePageChange(n)}
             key={n}
-            className={`border-2 border-gray-400 p-5 m-4 text-black ${
+            className={`border-2 border-gray-400 p-3 sm:p-5 m-2 text-black text-sm sm:text-base ${
               currentPage === n ? "bg-black text-white" : ""
-            } hover:text-gray-900 hover:border-gray-400 `}
+            } hover:text-gray-900 hover:border-gray-400`}
           >
             {n + 1}
           </button>
         ))}
         <button
           onClick={() => handleNextPageChange()}
-          className={` ${
+          className={`${
             currentPage === noOfPages - 1 ? "hidden" : ""
-          } text-2xl p-5 m-4 text-black hover:text-gray-900 hover:border-gray-400`}
+          } text-2xl sm:text-3xl p-3 sm:p-5 m-2 text-black hover:text-gray-900 hover:border-gray-400`}
         >
           ▶
         </button>

@@ -84,6 +84,7 @@ export const useAuthStore = create((set, get) => ({
       throw error;
     }
   },
+
   checkAuth: async () => {
     set({ isCheckingAuth: true, error: null });
     try {
@@ -107,7 +108,7 @@ export const useAuthStore = create((set, get) => ({
       set({
         user: null,
         isAuthenticated: false,
-        error: error.response?.data?.message || error.message,
+        //  error: error.response?.data?.message || error.message,
       });
     } finally {
       set({ isCheckingAuth: false });

@@ -1,9 +1,11 @@
 import React, { useEffect } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import { useRewardStore } from "../../store/rewardStore";
+import { useNavigate } from "react-router-dom";
 
 const ManageRewards = () => {
   const { fetchRewards, rewards } = useRewardStore();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchRewards();
@@ -15,6 +17,11 @@ const ManageRewards = () => {
       console.log("Deleting reward with id:", id);
     }
   };
+
+  const handleEdit = (id) => {
+    navigate(`/admin/edit-reward/${id}`);
+  };
+
   console.log(rewards);
   return (
     <div className="flex-2 ml-64 p-6 overflow-x-auto">
@@ -28,8 +35,8 @@ const ManageRewards = () => {
             {/* Top-right Edit/Delete Buttons */}
             <div className="absolute top-2 right-2 flex space-x-2">
               <button
-                onClick={() => console.log("Edit", reward._id)}
-                className="p-2 rounded-full border hover:bg-gray-100 transition"
+                onClick={() => handleEdit(reward._id)}
+                className="p-2 rounded-full border bg-white hover:bg-gray-100 transition"
               >
                 <Pencil size={16} />
               </button>

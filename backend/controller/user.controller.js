@@ -129,3 +129,96 @@ export const sendSubscriptionMail = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const giveRewardTOUser = async (req, res) => {
+  try {
+    const { userId, eventId, rewardAmount } = req.body;
+
+    // Validate inputs
+    if (!userId || !eventId || !rewardAmount) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields: userId, eventId, or rewardAmount",
+      });
+    }
+
+    // Convert rewardAmount to number if it's a string
+    const reward = Number(rewardAmount);
+
+    // Validate reward amount
+    if (isNaN(reward) || reward < 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid reward amount",
+      });
+    }
+
+    // Find the user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Find the event
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found",
+      });
+    }
+
+    // Check if user is registered for the event
+    const userEventRegistration = user.registeredEvents.find(
+      (registration) => registration.eventId.toString() === eventId
+    );
+
+    if (!userEventRegistration) {
+      return res.status(400).json({
+        success: false,
+        message: "User is not registered for this event",
+      });
+    }
+
+    // Add reward to user's balance
+    user.rewardBalance = (user.rewardBalance || 0) + reward;
+
+    // Log the reward in transaction history
+    user.rewardTransactions = user.rewardTransactions || [];
+    user.rewardTransactions.push({
+      amount: reward,
+      type: "credit",
+      description: `Reward for ${event.name}`,
+      timestamp: new Date(),
+      eventId: eventId,
+    });
+
+    // Save the updated user
+    await user.save();
+
+    // Return success response
+    return res.status(200).json({
+      success: true,
+      message: `Successfully added ${reward} reward points to ${user.name}`,
+      data: {
+        userId: user._id,
+        name: user.name,
+        newRewardBalance: user.rewardBalance,
+      },
+    });
+  } catch (error) {
+    console.error("Error giving reward to user:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+export const addNotificationTOUSer = async (req, res) => {};
+
+export const markNotificationAsRead = async (req, res) => {};

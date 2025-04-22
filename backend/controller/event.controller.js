@@ -59,6 +59,8 @@ export const createEvents = async (req, res) => {
       adminId: new mongoose.Types.ObjectId(adminId),
     });
 
+    console.log("event", event);
+
     await event.save();
 
     res

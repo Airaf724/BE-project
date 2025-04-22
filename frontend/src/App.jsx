@@ -32,6 +32,7 @@ import CreateReward from "./Admin/page/CreateReward";
 import AdminEventsPage from "./pages/AdminEventsPage";
 import EditEventPage from "./Admin/page/EditEventPage";
 import ManageRewards from "./Admin/page/ManageRewards";
+import EditRewardPage from "./Admin/page/EditRewardPage";
 function App() {
   const { isCheckingAuth, checkAuth, isAuthenticated, user } = useAuthStore();
   const navigate = useNavigate();
@@ -118,7 +119,7 @@ function App() {
     <div className="min-h-screen flex flex-col">
       <ToastContainer position="top-center" autoClose={3000} />
       {user?.role === "admin" ? <AdminNavbar /> : <Navbar />}
-      <main className="flex-grow pt-20">
+      <main className="flex-grow pt-20 px-4 sm:px-6 lg:px-8">
         <Routes>
           <Route
             path="/"
@@ -192,6 +193,10 @@ function App() {
           <Route path="/events/:domain" element={<EventPage />} />
           <Route path="/event/:event-id" element={<EventDetailPage />} />
           <Route path="/edit-event/:eventId" element={<EditEventPage />} />
+          <Route
+            path="/admin/edit-reward/:rewardId"
+            element={<EditRewardPage />}
+          />
           {/* Admin routes */}
           <Route path="/:user_id/my-lists" element={<UserList />} />
           <Route path="/:user_id/submissions" element={<UserSubmissions />} />

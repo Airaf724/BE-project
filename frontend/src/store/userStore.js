@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import axios from "axios";
+
 const API_URL =
   import.meta.env.MODE === "development"
     ? "http://localhost:5000/api/users"
@@ -7,7 +8,7 @@ const API_URL =
 
 axios.defaults.withCredentials = true;
 
-export const useUserStore = create((set) => ({
+export const useUserStore = create((set, get) => ({
   users: null,
   error: null,
   isLoading: false,
@@ -27,6 +28,63 @@ export const useUserStore = create((set) => ({
     }
   },
 
+  getUsersByIds: async (userIds) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.post(`${API_URL}/getusersbyids`, {
+        userIds,
+      });
+      const usersData = response?.data?.data;
+      set({ isLoading: false });
+      return usersData;
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: error.response?.data?.message || "Error fetching users by IDs",
+      });
+      return [];
+    }
+  },
+
+  updateUserEventStatus: async (userId, eventId, newStatus, reward) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.post(`${API_URL}/updateStatus`, {
+        userId,
+        eventId,
+        newStatus,
+        reward,
+      });
+      set({ isLoading: false });
+      return response.data;
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: error.response?.data?.message || "Error updating user status",
+      });
+      throw error;
+    }
+  },
+
+  giveUserReward: async (userId, eventId, rewardAmount) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.post(`${API_URL}/giveReward`, {
+        userId,
+        eventId,
+        rewardAmount,
+      });
+      set({ isLoading: false });
+      return response.data;
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: error.response?.data?.message || "Error giving reward",
+      });
+      throw error;
+    }
+  },
+
   setUserprofile: async (id, formData) => {
     set({ isLoading: true, error: null });
     try {
@@ -42,28 +100,21 @@ export const useUserStore = create((set) => ({
   },
 
   subscribeNewsletter: async (email, userName) => {
+    set({ isLoading: true, error: null });
     try {
-      console.log("userName", userName);
       const response = await axios.post(`${API_URL}/newsletter`, {
         email,
         userName,
       });
-      console.log("Subscribed successfully:", response.data);
+      set({ isLoading: false });
+      return response.data;
     } catch (error) {
-      console.error(
-        "Subscription failed:",
-        error.response?.data || error.message
-      );
+      set({
+        isLoading: false,
+        error:
+          error.response?.data?.message || "Error subscribing to newsletter",
+      });
+      throw error;
     }
   },
-
-  // deleteUser: async (id) => {
-  //     set({ isLoading: true, error: null });
-  //     try {
-  //         await axios.delete(`${API_URL}/users/${id}`);
-  //         set({ isLoading: false, users: users.filter(user => user._id!==id) });
-  //     } catch (error) {
-  //         set({ isLoading: false, error: error.response?.data?.message || "Error deleting user" });
-  //     }
-  // }
 }));

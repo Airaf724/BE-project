@@ -57,7 +57,7 @@ const EventCard = ({ event, onDelete, isAdmin = false }) => {
   };
 
   return (
-    <div className="w-72 bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden relative">
+    <div className="w-full sm:w-72 bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden relative">
       <Link to={`/event/${event._id}`}>
         <div className="w-full h-52 bg-gray-100 flex items-center justify-center overflow-hidden">
           <img
@@ -114,6 +114,7 @@ const EventCard = ({ event, onDelete, isAdmin = false }) => {
           </div>
         </div>
       </div>
+
       <div className="absolute top-3 right-3 flex space-x-2">
         <button
           onClick={handleEditClick}

@@ -1,29 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useEventStore } from "../../store/eventStore";
-import axios from "axios";
+import { useUserStore } from "../../store/userStore";
+import { toast } from "react-toastify"; // Import toast
+
 const ManageEventAttendees = () => {
   const { eventId } = useParams();
   const [users, setUsers] = useState([]);
-  const [statusMap, setStatusMap] = useState({}); // Track status of users
+  const [statusMap, setStatusMap] = useState({});
   const { event, fetchEventById } = useEventStore();
-  const [rewardInputVisible, setRewardInputVisible] = useState(null); // Track visible input by userId
+  const { getUsersByIds, updateUserEventStatus, giveUserReward } =
+    useUserStore();
+  const [rewardInputVisible, setRewardInputVisible] = useState(null);
   const [rewardAmountMap, setRewardAmountMap] = useState({});
 
   useEffect(() => {
-    const fetchEvent = async () => {
+    const fetchEventAndUsers = async () => {
       try {
-        await fetchEventById(eventId); // Fetch event details
+        await fetchEventById(eventId);
 
         if (event?.registered?.length) {
-          const response = await axios.post(
-            "http://localhost:5000/api/users/getusersbyids",
-            {
-              userIds: event?.registered,
-            }
-          );
-
-          const usersData = response?.data?.data;
+          const usersData = await getUsersByIds(event.registered);
           setUsers(usersData);
 
           // Initialize status map
@@ -32,7 +29,7 @@ const ManageEventAttendees = () => {
             const eventStatus = user.registeredEvents.find(
               (ev) => ev.eventId === eventId
             )?.status;
-            initialStatus[user._id] = eventStatus || "Registered"; // Default to "Pending" if not found
+            initialStatus[user._id] = eventStatus || "Registered";
           });
 
           setStatusMap(initialStatus);
@@ -43,25 +40,38 @@ const ManageEventAttendees = () => {
     };
 
     if (eventId) {
-      fetchEvent();
+      fetchEventAndUsers();
     }
-  }, [eventId]);
+  }, [eventId, event?.registered?.length]);
 
-  // console.log("event", event?.attendanceReward);
   const reward = event?.attendanceReward || 0;
 
   const handleStatusChange = async (userId, eventId, newStatus) => {
     setStatusMap((prev) => ({ ...prev, [userId]: newStatus }));
 
     try {
-      await axios.post("http://localhost:5000/api/users/updateStatus", {
-        userId,
-        eventId,
-        newStatus,
-        reward,
-      });
+      await updateUserEventStatus(userId, eventId, newStatus, reward);
     } catch (error) {
       console.error("Error updating status:", error);
+      toast.error("Failed to update status");
+    }
+  };
+
+  const handleGiveReward = async (userId, rewardAmount) => {
+    try {
+      await giveUserReward(userId, eventId, rewardAmount);
+
+      // Show success toast message instead of alert
+      toast.success("Reward given successfully!");
+
+      setRewardInputVisible(null);
+      setRewardAmountMap((prev) => ({
+        ...prev,
+        [userId]: "",
+      }));
+    } catch (err) {
+      console.error("Error giving reward:", err);
+      toast.error("Failed to give reward");
     }
   };
 
@@ -90,7 +100,7 @@ const ManageEventAttendees = () => {
               <td className="py-3 px-4 border">{user.email}</td>
               <td className="py-3 px-4 border text-center">
                 <select
-                  value={statusMap[user._id] || "Registered"} // Default to "Pending" only if status is not found
+                  value={statusMap[user._id] || "Registered"}
                   onChange={(e) =>
                     handleStatusChange(user._id, eventId, e.target.value)
                   }
@@ -129,27 +139,9 @@ const ManageEventAttendees = () => {
                         className="border px-2 py-1 w-20 rounded"
                       />
                       <button
-                        onClick={async () => {
-                          try {
-                            await axios.post(
-                              "http://localhost:5000/api/users/giveReward",
-                              {
-                                userId: user._id,
-                                eventId,
-                                rewardAmount: rewardAmountMap[user._id],
-                              }
-                            );
-                            alert("Reward given successfully!");
-                            setRewardInputVisible(null); // Hide input after submission
-                            setRewardAmountMap((prev) => ({
-                              ...prev,
-                              [user._id]: "",
-                            }));
-                          } catch (err) {
-                            console.error("Error giving reward:", err);
-                            alert("Failed to give reward");
-                          }
-                        }}
+                        onClick={() =>
+                          handleGiveReward(user._id, rewardAmountMap[user._id])
+                        }
                         className="text-green-600 hover:text-green-800"
                         title="Submit Reward"
                       >

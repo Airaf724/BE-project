@@ -11,10 +11,10 @@ const AdminEventsPage = () => {
     fetchEventsByAdmin(user?._id);
   }, []);
   return (
-    <div className="p-6 ml-[260px]">
-      {" "}
-      {/* Shift right for sidebar (adjust width as needed) */}
+    <div className="p-6 ml-[260px] md:ml-[200px] lg:ml-[250px]">
+      {/* Adjusted the margin for different screen sizes to better align the content */}
       <h1 className="text-2xl font-bold mb-6">Your Created Events</h1>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {events.map((event) => (
           <EventCard key={event?._id} event={event} />

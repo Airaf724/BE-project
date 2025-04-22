@@ -186,6 +186,7 @@ const CreateEvent = () => {
               <option value="technical">Technology</option>
               <option value="sports">Sports</option>
               <option value="cultural">Cultural</option>
+              <option value="competitions">Competition</option>
               <option value="others">Other</option>
             </select>
           </div>
@@ -205,6 +206,9 @@ const CreateEvent = () => {
             <option value="TPO">TPO</option>
             <option value="GDSC">GDSC</option>
             <option value="ITSA">ITSA</option>
+            <option value="CESA">CESA</option>
+            <option value="ETSA">ETSA</option>
+            <option value="college">College Event</option>
             <option value="others">Other</option>
           </select>
         </div>

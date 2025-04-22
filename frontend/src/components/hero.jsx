@@ -9,7 +9,7 @@ const Hero = () => {
   const API_URL =
     import.meta.env.MODE === "development"
       ? "http://localhost:5000/api/events"
-      : "/api";
+      : "/api/events";
 
   axios.defaults.withCredentials = true;
 
@@ -47,17 +47,17 @@ const Hero = () => {
   return (
     <div className="relative w-full min-h-screen flex flex-col md:flex-row bg-gradient-to-b from-[#fde1ff] to-[#e1ffea22] pt-20">
       {/* Left Section - Full width on mobile, half width on desktop */}
-      <div className="fixed top-20 right-20 opacity-90 z-10">
+      <div className="fixed top-20 right-5 md:right-20 opacity-90 z-10 w-full md:w-auto">
         <input
           type="text"
           value={searchValue}
           placeholder="Search"
           onChange={(e) => setSearchValue(e.target.value)}
-          className="w-[350px] px-4 py-2 border border-gray-300 rounded-md shadow-md focus:outline-none"
+          className="w-[90%] md:w-[350px] px-4 py-2 border border-gray-300 rounded-md shadow-md focus:outline-none"
         />
 
         {searchResult.length > 0 && (
-          <div className="w-full bg-white border  border-gray-300 rounded-md shadow-md p-2 mt-2">
+          <div className="w-full bg-white border border-gray-300 rounded-md shadow-md p-2 mt-2 max-h-[300px] overflow-y-auto">
             {searchResult.map((event, index) => (
               <Link to={`/event/${event._id}`} key={index}>
                 <div className="py-1 px-2 flex justify-between hover:bg-gray-100 cursor-pointer">
@@ -69,8 +69,9 @@ const Hero = () => {
           </div>
         )}
       </div>
-      <div className="w-full  md:w-1/2 flex flex-col justify-center p-6 md:pl-16">
-        <h2 className="text-[#090909]  text-xl md:text-2xl font-semibold">
+
+      <div className="w-full md:w-1/2 flex flex-col justify-center p-6 md:pl-16">
+        <h2 className="text-[#090909] text-xl md:text-2xl font-semibold">
           Latest Events Near You!!
         </h2>
         <div className="mt-4">
@@ -87,7 +88,7 @@ const Hero = () => {
             Register Now!
           </p>
         </div>
-        <div className="flex  items-center justify-start gap-4 mt-8 w-[200px] h-[50px] rounded-full bg-[#ff4141] text-white text-xl font-medium">
+        <div className="flex items-center justify-start gap-4 mt-8 w-[200px] h-[50px] rounded-full bg-[#ff4141] text-white text-xl font-medium cursor-pointer">
           <div className="ml-4">Latest Events</div>
           <img src={arrow_icon} alt="Arrow" />
         </div>
