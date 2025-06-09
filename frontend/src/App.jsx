@@ -33,6 +33,11 @@ import AdminEventsPage from "./pages/AdminEventsPage";
 import EditEventPage from "./Admin/page/EditEventPage";
 import ManageRewards from "./Admin/page/ManageRewards";
 import EditRewardPage from "./Admin/page/EditRewardPage";
+import StripePayment from "./components/StripePayment";
+import StripeWrapper from "./components/StripeWrapper";
+import PaymentCancelled from "./components/PaymentCancelled";
+import PaymentSuccess from "./components/PaymentSuccess";
+
 function App() {
   const { isCheckingAuth, checkAuth, isAuthenticated, user } = useAuthStore();
   const navigate = useNavigate();
@@ -73,37 +78,63 @@ function App() {
   const ProtectedRoutes = ({ children }) => {
     useEffect(() => {
       if (isDataLoaded && !isCheckingAuth) {
-        if (!isAuthenticated) {
+        // If not authenticated or user is undefined, redirect to login
+        if (!isAuthenticated || !user) {
           navigate("/login", { replace: true });
-        } else if (user?.isVerified === false) {
+          return;
+        }
+
+        // If user exists but email is not verified
+        if (user.isVerified === false) {
           navigate("/verify-email", { replace: true });
-        } else if (user?.isProfileComplete === false) {
-          if (user?.role === "admin") {
+          return;
+        }
+
+        // If user exists but profile is incomplete
+        if (user.isProfileComplete === false) {
+          if (user.role === "admin") {
             navigate("/admin/collgedetails", { replace: true });
-          } else if (user?.role === "student") {
+          } else if (user.role === "student") {
             navigate("/settings", { replace: true });
           }
-        } else if (user?.role === "admin") {
+          return;
+        }
+
+        if (user.role === "admin" && window.location.pathname === "/") {
           navigate("/admin", { replace: true });
         }
       }
     }, [isDataLoaded, isCheckingAuth, isAuthenticated, user]);
+
+    // Show loading while checking auth or data is not loaded
+    if (isCheckingAuth || !isDataLoaded) {
+      return <LoadingSpinner />;
+    }
+
+    // If not authenticated or user is undefined, don't render children
+    if (!isAuthenticated || !user) {
+      return <LoadingSpinner />;
+    }
+
     return children;
   };
 
   // Protect admin routes
   const ProtectIsAdminRoute = ({ children }) => {
     useEffect(() => {
-      if (isDataLoaded && !isCheckingAuth && user?.role !== "admin") {
-        navigate("/", { replace: true });
+      if (isDataLoaded && !isCheckingAuth) {
+        // If not authenticated, user is undefined, or user is not admin
+        if (!isAuthenticated || !user || user.role !== "admin") {
+          navigate("/", { replace: true });
+        }
       }
-    }, [isDataLoaded, isCheckingAuth, user]);
+    }, [isDataLoaded, isCheckingAuth, isAuthenticated, user]);
 
     if (isCheckingAuth || !isDataLoaded) {
       return <LoadingSpinner />;
     }
 
-    if (user?.role !== "admin") {
+    if (!isAuthenticated || !user || user.role !== "admin") {
       return <div>You're not authorized to access this page</div>;
     }
 
@@ -121,14 +152,7 @@ function App() {
       {user?.role === "admin" ? <AdminNavbar /> : <Navbar />}
       <main className="flex-grow pt-20 px-4 sm:px-6 lg:px-8">
         <Routes>
-          <Route
-            path="/"
-            element={
-              <ProtectedRoutes>
-                <DashboardPage />
-              </ProtectedRoutes>
-            }
-          />
+          {/* Public Routes */}
           <Route
             path="/signup"
             element={
@@ -145,9 +169,6 @@ function App() {
               </RedirectAuthenticatedUser>
             }
           />
-          <Route path="/verify-email" element={<EmailVerificationPage />} />
-          <Route path="/settings" element={<ProfilePage />} />
-          <Route path="/admin/collgedetails" element={<CollegeDetailsPage />} />
           <Route
             path="/forgot-password"
             element={
@@ -164,6 +185,18 @@ function App() {
               </RedirectAuthenticatedUser>
             }
           />
+          <Route path="/verify-email" element={<EmailVerificationPage />} />
+
+          {/* Protected Routes */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoutes>
+                <DashboardPage />
+              </ProtectedRoutes>
+            }
+          />
+          <Route path="/settings" element={<ProfilePage />} />
           <Route
             path="/store"
             element={
@@ -172,12 +205,54 @@ function App() {
               </ProtectedRoutes>
             }
           />
-          {/* Admin routes */}
+          <Route path="/events/:domain" element={<EventPage />} />
+          <Route path="/event/:event-id" element={<EventDetailPage />} />
+          <Route path="/:user_id/my-lists" element={<UserList />} />
+          <Route path="/:user_id/submissions" element={<UserSubmissions />} />
+          <Route path="/:userId/orders" element={<OrdersPage />} />
+
+          {/* Payment Routes - Protected */}
+          <Route
+            path="/payment"
+            element={
+              <ProtectedRoutes>
+                <StripeWrapper>
+                  <StripePayment />
+                </StripeWrapper>
+              </ProtectedRoutes>
+            }
+          />
+          <Route
+            path="/placeorder"
+            element={
+              <ProtectedRoutes>
+                <OrderDetail />
+              </ProtectedRoutes>
+            }
+          />
+          <Route
+            path="/payment-success"
+            element={
+              <ProtectedRoutes>
+                <PaymentSuccess />
+              </ProtectedRoutes>
+            }
+          />
+          <Route
+            path="/payment-cancelled"
+            element={
+              <ProtectedRoutes>
+                <PaymentCancelled />
+              </ProtectedRoutes>
+            }
+          />
+
+          {/* Admin Routes */}
+          <Route path="/admin/collgedetails" element={<CollegeDetailsPage />} />
           <Route
             path="/admin"
             element={
               <ProtectIsAdminRoute>
-                {/* <AdminDashboard /> */}
                 <AdminEventsPage />
               </ProtectIsAdminRoute>
             }
@@ -190,30 +265,27 @@ function App() {
               </ProtectIsAdminRoute>
             }
           />
-          <Route path="/events/:domain" element={<EventPage />} />
-          <Route path="/event/:event-id" element={<EventDetailPage />} />
-          <Route path="/edit-event/:eventId" element={<EditEventPage />} />
           <Route
-            path="/admin/edit-reward/:rewardId"
-            element={<EditRewardPage />}
-          />
-          {/* Admin routes */}
-          <Route path="/:user_id/my-lists" element={<UserList />} />
-          <Route path="/:user_id/submissions" element={<UserSubmissions />} />
-          <Route path="/orders" element={<OrdersPage />} />
-          <Route path="/admin/create-event" element={<CreateEvent />} />
-          <Route path="/admin/mange" element={<MangeUsers />} />
-          <Route
-            path="/admin/events/:eventId"
-            element={<ManageEventAttendees />}
-          />
-
-          <Route path="*" element={<Navigate to="/" replace />} />
-          <Route
-            path="/admin/*"
+            path="/admin/create-event"
             element={
               <ProtectIsAdminRoute>
-                <AdminDashboard />
+                <CreateEvent />
+              </ProtectIsAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/mange"
+            element={
+              <ProtectIsAdminRoute>
+                <MangeUsers />
+              </ProtectIsAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/events/:eventId"
+            element={
+              <ProtectIsAdminRoute>
+                <ManageEventAttendees />
               </ProtectIsAdminRoute>
             }
           />
@@ -241,7 +313,24 @@ function App() {
               </ProtectIsAdminRoute>
             }
           />
-          <Route path="/placeorder" element={<OrderDetail />} />
+          <Route
+            path="/edit-event/:eventId"
+            element={
+              <ProtectIsAdminRoute>
+                <EditEventPage />
+              </ProtectIsAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/edit-reward/:rewardId"
+            element={
+              <ProtectIsAdminRoute>
+                <EditRewardPage />
+              </ProtectIsAdminRoute>
+            }
+          />
+
+          {/* Catch-all route - must be last */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

@@ -1,8 +1,10 @@
+// controllers/orderController.js
 import { Order } from "../models/orders.model.js";
 import { User } from "../models/user.model.js";
+// Make sure this import is working correctly
 import { Reward } from "../models/rewards.model.js";
-import { sendCourseCredentialsToUser } from "../nodemailer/nodemailer.js"; // Adjust path if needed
-
+import { sendCourseCredentialsToUser } from "../nodemailer/nodemailer.js";
+// Updated placeOrder function with minimum payment requirement
 export const placeOrder = async (req, res) => {
   try {
     const {
@@ -15,92 +17,205 @@ export const placeOrder = async (req, res) => {
       courseLink,
       courseImage,
       credentials,
+      coursePrice, // Add this to your request
     } = req.body;
 
     // Validate required fields
-    if (
-      !userId ||
-      !userName ||
-      !userEmail ||
-      !rewardId ||
-      !courseName ||
-      !coursePoints ||
-      !courseImage
-    ) {
+    if (!userId || !rewardId || !courseName || !coursePoints || !coursePrice) {
       return res.status(400).json({
         success: false,
-        message: "Missing required fields for course redemption",
+        message: "Missing required fields",
       });
     }
 
-    // Create order using the Order schema
-    const newOrder = new Order({
-      userId, // MongoDB ObjectId reference to User
-      userName,
-      userEmail,
-      rewardId, // MongoDB ObjectId reference to Reward
-      courseName,
-      coursePoints,
-      courseLink: courseLink || "pending_assignment",
-      courseImage:
-        courseImage ||
-        "https://www.istockphoto.com/photo/happy-business-leader-talking-to-group-of-his-colleagues-on-a-seminar-in-board-room-gm2116544916-567259943?utm_source=pixabay&utm_medium=affiliate&utm_campaign=sponsored_image&utm_content=srp_topbanner_media&utm_term=training+course",
-      credentials: {
-        email: credentials?.email || "",
-        password: "", // Will be filled by admin later
-      },
-      status: "pending", // Using enum from schema: "pending", "processing", "completed", etc.
-      adminNotes: "",
-      completedAt: null,
-    });
-
-    // Save the order to database
-    await newOrder.save();
-
-    // Find the user and deduct points
+    // Check if user exists and has enough points
     const user = await User.findById(userId);
-    if (user) {
-      user.points -= coursePoints;
-      await user.save();
-    } else {
-      // If we somehow can't find the user, still create the order but log warning
-      console.warn(`Order created but user not found for ID: ${userId}`);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
 
-    // Send response
+    // FIXED PAYMENT CALCULATION WITH GUARANTEED MINIMUM PAYMENT
+    const MINIMUM_PAYMENT = 100; // Minimum 100 rupees required ALWAYS
+    const coinValue = coursePrice / coursePoints; // e.g., 500/4000 = 0.125
+
+    // Calculate maximum discount allowed (coursePrice - minimum payment)
+    const maxAllowedDiscount = coursePrice - MINIMUM_PAYMENT;
+
+    // Calculate maximum coins that can be used for discount
+    const maxCoinsForDiscount = Math.floor(maxAllowedDiscount / coinValue);
+
+    // Determine actual coins to use (considering user's available points)
+    const coinsToUse = Math.min(
+      user.points, // User's available points
+      coursePoints, // Course's point requirement
+      maxCoinsForDiscount // Maximum coins allowed for discount
+    );
+
+    // Calculate actual discount and payable amount
+    const coinDiscount = coinsToUse * coinValue;
+    const payableAmount = coursePrice - coinDiscount;
+
+    // Ensure payable amount is never less than minimum payment
+    const finalPayableAmount = Math.max(payableAmount, MINIMUM_PAYMENT);
+
+    // If somehow the calculation still results in less than minimum,
+    // adjust the coins used to ensure minimum payment
+    let finalCoinsUsed = coinsToUse;
+    if (finalPayableAmount > payableAmount) {
+      // Recalculate coins to ensure minimum payment
+      const adjustedDiscount = coursePrice - MINIMUM_PAYMENT;
+      finalCoinsUsed = Math.floor(adjustedDiscount / coinValue);
+      coinDiscount = finalCoinsUsed * coinValue;
+    }
+
+    // Create order
+    const newOrder = new Order({
+      userId,
+      userName,
+      userEmail,
+      rewardId,
+      courseName,
+      coursePoints,
+      courseLink,
+      courseImage,
+      coursePrice,
+      coinsUsed: finalCoinsUsed,
+      coinValue,
+      payableAmount: finalPayableAmount,
+      coinDiscount: finalCoinsUsed * coinValue,
+      minimumPaymentRequired: MINIMUM_PAYMENT,
+      credentials: {
+        email: credentials?.email || userEmail,
+        password: "",
+      },
+      status: "payment_required",
+      paymentStatus: "pending",
+    });
+
+    const savedOrder = await newOrder.save();
+
+    // Don't deduct coins immediately - wait for payment completion
+    // Coins will be deducted after successful payment in the Stripe webhook/verification
+
     res.status(201).json({
       success: true,
-      message:
-        "Course redemption successful! We'll email your credentials within 24 hours.",
+      message: `Order created successfully. Payment of ₹${finalPayableAmount} required to complete redemption.`,
       orderData: {
-        id: newOrder._id,
-        courseName: newOrder.courseName,
-        status: newOrder.status,
+        orderId: savedOrder._id,
+        payableAmount: finalPayableAmount,
+        coinsUsed: finalCoinsUsed,
+        coinValue,
+        coinDiscount: finalCoinsUsed * coinValue,
+        minimumPayment: MINIMUM_PAYMENT,
+        requiresPayment: true,
+        totalPrice: coursePrice,
       },
     });
   } catch (error) {
-    console.error("Error processing course redemption:", error);
-
-    // Provide a more detailed error message for debugging in development
-    const errorMessage =
-      process.env.NODE_ENV === "development"
-        ? `Error: ${error.message}`
-        : "Failed to process your course redemption";
-
+    console.error("Error placing order:", error);
     res.status(500).json({
       success: false,
-      message: errorMessage,
+      message: "Internal server error",
+    });
+  }
+};
+// Get orders for user - with error handling for populate
+export const getUserOrders = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    console.log(userId);
+
+    let orders;
+    try {
+      orders = await Order.find({ userId }).sort({ createdAt: -1 });
+    } catch (populateError) {
+      console.warn(
+        "Populate failed, fetching without populate:",
+        populateError.message
+      );
+      orders = await Order.find({ userId }).sort({ createdAt: -1 });
+    }
+
+    console.log(orders);
+    res.json({
+      success: true,
+      order: orders, // ← Change from 'orders' to 'order'
+    });
+  } catch (error) {
+    console.error("Error fetching user orders:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch orders",
+    });
+  }
+};
+// Get all orders (admin) - with error handling for populate
+export const getAllOrders = async (req, res) => {
+  try {
+    // Try with populate first, fallback to without populate if it fails
+    let orders;
+    try {
+      orders = await Order.find()
+        .sort({ createdAt: -1 })
+        .populate("userId", "name email")
+        .populate("rewardId", "title description");
+    } catch (populateError) {
+      console.warn(
+        "Populate failed, fetching without populate:",
+        populateError.message
+      );
+      orders = await Order.find().sort({ createdAt: -1 });
+    }
+
+    res.json({
+      success: true,
+      orders,
+    });
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch orders",
     });
   }
 };
 
-export const getAllOrders = async (req, res) => {
+// Update order status
+export const updateOrderStatus = async (req, res) => {
   try {
-    const orders = await Order.find({});
-    res.status(200).json({ success: true, orders });
+    const { orderId } = req.params;
+    const { status, adminNotes, credentials } = req.body;
+
+    const updateData = { status };
+    if (adminNotes) updateData.adminNotes = adminNotes;
+    if (credentials) updateData.credentials = credentials;
+    if (status === "completed") updateData.completedAt = new Date();
+
+    const updatedOrder = await Order.findByIdAndUpdate(orderId, updateData, {
+      new: true,
+    });
+
+    if (!updatedOrder) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Order updated successfully",
+      order: updatedOrder,
+    });
   } catch (error) {
-    console.log("error", error);
-    res.status(500).json({ success: false, message: "server error" });
+    console.error("Error updating order:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update order",
+    });
   }
 };
 
@@ -150,8 +265,6 @@ export const updateOrder = async (req, res) => {
     });
   }
 };
-
-// Add this to your backend controllers
 
 export const sendCredentials = async (req, res) => {
   try {

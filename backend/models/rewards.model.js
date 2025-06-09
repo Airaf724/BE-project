@@ -47,4 +47,4 @@ const RewardSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export const Reward = mongoose.model("Rewards", RewardSchema);
+export const Reward = mongoose.model("Reward", RewardSchema);

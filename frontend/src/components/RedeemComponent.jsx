@@ -9,7 +9,6 @@ const RedeemComponent = () => {
   const points = user?.points;
   const { rewards, fetchRewards } = useRewardStore();
 
-  console.log(rewards);
   useEffect(() => {
     fetchRewards();
   }, []);
@@ -89,16 +88,14 @@ const RedeemComponent = () => {
                   className="block"
                 >
                   <button
-                    disabled={points < reward.points}
+                    disabled={points < 3000}
                     className={`w-full py-2 px-4 rounded-lg ${
-                      points < reward.points
+                      points < 3000
                         ? "bg-gray-300 text-gray-600 cursor-not-allowed"
                         : "bg-orange-500 hover:bg-orange-600 text-white"
                     } transition-colors duration-300`}
                   >
-                    {points < reward.points
-                      ? "Not Enough Points"
-                      : "Redeem Now"}
+                    {points < 3000 ? "Not Enough Points" : "Redeem Now"}
                   </button>
                 </Link>
               </div>

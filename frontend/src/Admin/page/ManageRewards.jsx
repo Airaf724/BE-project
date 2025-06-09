@@ -22,7 +22,6 @@ const ManageRewards = () => {
     navigate(`/admin/edit-reward/${id}`);
   };
 
-  console.log(rewards);
   return (
     <div className="flex-2 ml-64 p-6 overflow-x-auto">
       <h1 className="text-2xl font-bold mb-6">Manage Rewards</h1>

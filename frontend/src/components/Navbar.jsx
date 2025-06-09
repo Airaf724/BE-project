@@ -147,7 +147,7 @@ const Navbar = () => {
                       className="h-full w-full rounded-full object-cover"
                     />
                   ) : (
-                    <User className="h-6 w-6 text-gray-600" />
+                    <User className="h-8 w-6 text-gray-600" />
                   )}
                 </div>
               </button>
@@ -178,12 +178,20 @@ const Navbar = () => {
                       </p>
                     </div>
                   </div>
-                  <Link
+                  {/* <Link
                     to={`${user?._id}/my-lists`}
                     className="flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-gray-100"
                   >
                     <List size={20} />
                     <span>My Lists</span>
+                  </Link> */}
+
+                  <Link
+                    to={`${user?._id}/orders`}
+                    className="flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    <List size={20} />
+                    <span>My Orders</span>
                   </Link>
 
                   <Link

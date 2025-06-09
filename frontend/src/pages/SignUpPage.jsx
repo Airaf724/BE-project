@@ -9,7 +9,9 @@ const SignUpPage = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [role, setRole] = useState("student"); // Default role
 
   const navigate = useNavigate();
@@ -74,6 +76,30 @@ const SignUpPage = () => {
                 )}
               </button>
             </div>
+
+            <div className="relative">
+              <Input
+                icon={Lock}
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                onClick={() =>
+                  setShowConfirmPassword((prevState) => !prevState)
+                }
+              >
+                {showConfirmPassword ? (
+                  <EyeClosed className="w-6 h-6 text-gray-500" />
+                ) : (
+                  <Eye className="w-6 h-6 text-gray-500" />
+                )}
+              </button>
+            </div>
+
             {/* Role Selection Dropdown */}
             <div className="mt-4">
               <div className="flex gap-4 mt-2">
@@ -100,17 +126,24 @@ const SignUpPage = () => {
             <PasswordStrengthMeter password={password} />
 
             <motion.button
-              className="mt-5 w-full py-3 px-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white 
-						font-bold rounded-lg shadow-lg hover:from-green-600
-						hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
-						 focus:ring-offset-gray-900 transition duration-200"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              className={`mt-5 w-full py-3 px-4 text-white font-bold rounded-lg shadow-lg 
+    transition duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900
+    ${
+      isLoading || confirmPassword !== password
+        ? "bg-gray-400 cursor-not-allowed"
+        : "bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 focus:ring-green-500"
+    }`}
+              whileHover={{
+                scale: isLoading || confirmPassword !== password ? 1 : 1.02,
+              }}
+              whileTap={{
+                scale: isLoading || confirmPassword !== password ? 1 : 0.98,
+              }}
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || confirmPassword !== password}
             >
               {isLoading ? (
-                <Loader className=" animate-spin mx-auto" size={24} />
+                <Loader className="animate-spin mx-auto" size={24} />
               ) : (
                 "Sign Up"
               )}

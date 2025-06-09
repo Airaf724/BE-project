@@ -10,7 +10,6 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const { login, isLoading, error } = useAuthStore();
-  console.log("cookie", document.cookie);
   const handleLogin = async (e) => {
     e.preventDefault();
     await login(email, password);

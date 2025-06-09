@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
 
-// models/Order.js
-
 const OrderSchema = new mongoose.Schema(
   {
     userId: {
@@ -38,6 +36,41 @@ const OrderSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    // Payment related fields
+    coursePrice: {
+      type: Number,
+      required: true, // Original price in rupees
+    },
+    coinsUsed: {
+      type: Number,
+      required: true, // Coins deducted from user
+    },
+    coinValue: {
+      type: Number,
+      required: true, // Value per coin (coursePrice/coursePoints)
+    },
+    payableAmount: {
+      type: Number,
+      required: true, // Amount to be paid via Stripe
+    },
+    // Stripe payment fields
+    stripePaymentIntentId: {
+      type: String,
+      default: null,
+    },
+    stripeSessionId: {
+      type: String,
+      default: null,
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["pending", "processing", "succeeded", "failed", "refunded"],
+      default: "pending",
+    },
+    paidAt: {
+      type: Date,
+      default: null,
+    },
     credentials: {
       email: {
         type: String,
@@ -50,7 +83,14 @@ const OrderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "processing", "completed", "rejected", "cancelled"],
+      enum: [
+        "pending",
+        "payment_required",
+        "processing",
+        "completed",
+        "rejected",
+        "cancelled",
+      ],
       default: "pending",
     },
     adminNotes: {
@@ -60,6 +100,10 @@ const OrderSchema = new mongoose.Schema(
     completedAt: {
       type: Date,
       default: null,
+    },
+    minimumPaymentRequired: {
+      type: Number,
+      default: 100,
     },
   },
   { timestamps: true }

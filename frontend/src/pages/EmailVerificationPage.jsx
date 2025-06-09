@@ -51,10 +51,11 @@ const EmailVerificationPage = () => {
       await verifyEmail(verificationCode);
       toast.success("Email verified successfully");
       if (user?.role === "student") {
-        navigate("/settings"); // Ensure this line is executed
+        navigate("/login"); // Ensure this line is executed
       } else {
-        navigate("/admin/collegedetails");
+        navigate("/login");
       }
+      // console.log("email verfication user ", user);
     } catch (error) {
       console.log("Error during verification:", error);
     }

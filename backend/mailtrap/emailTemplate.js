@@ -190,3 +190,73 @@ export const SUBSCRIBE_NEWSLETTER_TEMPLATE = `
 </body>
 </html>
 `;
+
+export const PAYMENT_SUCCESS_TEMPLATE = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Payment Successful - Course Access Granted</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background: linear-gradient(to right, #28a745, #218838); padding: 20px; text-align: center;">
+    <h1 style="color: white; margin: 0;">🎉 Payment Successful!</h1>
+  </div>
+  
+  <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 5px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+    <p>Hello <strong>{userName}</strong>,</p>
+    
+    <p>Congratulations! We have successfully processed your payment for the course redemption.</p>
+    
+    <!-- Course Details Section -->
+    <div style="background-color: white; padding: 15px; margin: 20px 0; border-radius: 5px; border-left: 4px solid #28a745;">
+      <h3 style="margin-top: 0; color: #28a745;">Course Details</h3>
+      <p><strong>Course Name:</strong> {courseName}</p>
+      <p><strong>Original Price:</strong> ₹{originalPrice}</p>
+      <p><strong>Coins Used:</strong> {coinsUsed} coins</p>
+      <p><strong>Coin Discount:</strong> ₹{coinDiscount}</p>
+      <p><strong>Amount Paid:</strong> ₹{amountPaid}</p>
+    </div>
+    
+    <!-- Payment Details Section -->
+    <div style="background-color: white; padding: 15px; margin: 20px 0; border-radius: 5px;">
+      <h3 style="margin-top: 0; color: #333;">Payment Information</h3>
+      <p><strong>Transaction ID:</strong> {transactionId}</p>
+      <p><strong>Order ID:</strong> {orderId}</p>
+      <p><strong>Payment Date:</strong> {paymentDate}</p>
+    </div>
+    
+    <!-- Course Access Section -->
+    <div style="background-color: #e8f5e8; padding: 15px; margin: 20px 0; border-radius: 5px; text-align: center;">
+      <h3 style="margin-top: 0; color: #28a745;">🚀 Your Course is Ready!</h3>
+      <p>You can now access your course using the link below:</p>
+      <div style="margin: 20px 0;">
+        <a href="{courseLink}" style="background-color: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Access Course Now</a>
+      </div>
+      {credentialsSection}
+    </div>
+    
+    <!-- Account Access -->
+    <div style="text-align: center; margin: 30px 0;">
+      <p>View your complete order history and manage your account:</p>
+      <a href="{accountURL}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">My Account</a>
+    </div>
+    
+    <!-- Support Section -->
+    <div style="background-color: #fff3cd; padding: 15px; margin: 20px 0; border-radius: 5px; border-left: 4px solid #ffc107;">
+      <h4 style="margin-top: 0; color: #856404;">Need Help?</h4>
+      <p style="margin-bottom: 0; color: #856404;">If you have any questions about your course or encounter any issues, please contact our support team at <strong>{supportEmail}</strong></p>
+    </div>
+    
+    <p>Thank you for choosing our platform for your learning journey!</p>
+    <p>Best regards,<br><strong>The Learning Platform Team</strong></p>
+  </div>
+  
+  <div style="text-align: center; margin-top: 20px; color: #888; font-size: 0.8em;">
+    <p>This is an automated message, please do not reply to this email.</p>
+    <p>If you did not authorize this transaction, please contact support immediately.</p>
+  </div>
+</body>
+</html>
+`;

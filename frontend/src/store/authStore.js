@@ -142,6 +142,7 @@ export const useAuthStore = create((set, get) => ({
           isLoading: false,
         });
         // return response.data;
+        console.log("verifyEmail user", response?.data?.user);
       } else {
         throw new Error("No user data received from verification");
       }

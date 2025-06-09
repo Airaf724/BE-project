@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useAuthStore } from "../store/authStore";
 
 const NotificationsDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
-
+  const { user } = useAuthStore();
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -15,32 +16,7 @@ const NotificationsDropdown = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const notifications = [
-    {
-      id: 1,
-      type: "challenge",
-      message: "Completed a daily challenge for February Challenge 2025",
-      points: 10,
-      time: "6 hours ago",
-      icon: "🏆",
-    },
-    {
-      id: 2,
-      type: "contest",
-      message: "New Events are Aproching .",
-      linkText: "Join here!",
-      time: "8 hours ago",
-      icon: "🏅",
-    },
-    {
-      id: 3,
-      type: "challenge",
-      message: "Register Exclusive Events just for you ",
-      points: 10,
-      time: "a day ago",
-      icon: "🏆",
-    },
-  ];
+  const notifications = user?.notifications;
 
   return (
     <div ref={dropdownRef} className="relative">
@@ -67,7 +43,7 @@ const NotificationsDropdown = () => {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
           <div className="max-h-96 overflow-y-auto">
-            {notifications.map((notification) => (
+            {notifications?.map((notification) => (
               <div
                 key={notification.id}
                 className="p-4 border-b border-gray-100 hover:bg-gray-50"

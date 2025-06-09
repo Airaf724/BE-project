@@ -1,22 +1,29 @@
 import { User } from "../models/user.model.js";
 import { Event } from "../models/events.model.js";
 import { sendSubscriptionMailToUser } from "../nodemailer/nodemailer.js";
+
 export const getUsersData = async (req, res) => {
   try {
     const { collegeId } = req.body;
+
     if (!collegeId) {
-      res
-        .status(200)
-        .json({ success: false, message: "problem with fetching users" });
+      return res
+        .status(400)
+        .json({ success: false, message: "College ID is required" });
     }
+
     const users = await User.find({ college: collegeId });
-    res.status(200).json({ success: true, data: users });
-    return users;
+
+    return res.status(200).json({ success: true, data: users });
   } catch (error) {
-    console.log(error.message);
-    res
-      .status(500)
-      .json({ success: false, message: "problem with fetching users" });
+    console.error(error.message);
+
+    // Optional: Check if response has already been sent
+    if (!res.headersSent) {
+      return res
+        .status(500)
+        .json({ success: false, message: "Problem with fetching users" });
+    }
   }
 };
 

@@ -11,17 +11,30 @@ const PopularEvents = () => {
   const { getColleges, colleges } = useCollegeStore();
   const { user } = useAuthStore();
   const navigate = useNavigate();
+
   const [registrationInProgress, setRegistrationInProgress] = useState(false);
-  const [selectedCollege, setSelectedCollege] = useState("all");
+  const [selectedCollege, setSelectedCollege] = useState(null);
   const [showCollegeDropdown, setShowCollegeDropdown] = useState(false);
 
   useEffect(() => {
     getColleges();
   }, [getColleges]);
 
+  // Set default selected college to user's college when user and colleges are loaded
   useEffect(() => {
-    // Pass both collegeId and activeTab parameters to match the controller requirements
-    fetchEvents(selectedCollege, "college");
+    if (user?.college && colleges.length > 0 && !selectedCollege) {
+      setSelectedCollege(user.college);
+    }
+  }, [user, colleges, selectedCollege]);
+
+  // Fetch events when selectedCollege changes
+  useEffect(() => {
+    if (selectedCollege) {
+      fetchEvents(
+        selectedCollege === "all" ? "all" : selectedCollege,
+        "college"
+      );
+    }
   }, [fetchEvents, selectedCollege]);
 
   const handleRegistration = async (eventId) => {
@@ -30,9 +43,7 @@ const PopularEvents = () => {
       return;
     }
 
-    if (registrationInProgress) {
-      return; // Prevent double submission
-    }
+    if (registrationInProgress) return;
 
     try {
       setRegistrationInProgress(true);
@@ -55,12 +66,18 @@ const PopularEvents = () => {
     setShowCollegeDropdown(false);
   };
 
-  // Find college name from selected ID
   const getCollegeName = () => {
     if (selectedCollege === "all") return "All Colleges";
     const college = colleges.find((c) => c._id === selectedCollege);
-    return college ? college.name : "My College";
+    return college ? college.name : "Select College";
   };
+
+  const sortedColleges = (() => {
+    if (!user?.college || !colleges.length) return colleges;
+    const myCollege = colleges.find((c) => c._id === user.college);
+    const others = colleges.filter((c) => c._id !== user.college);
+    return myCollege ? [myCollege, ...others] : colleges;
+  })();
 
   return (
     <div
@@ -74,7 +91,6 @@ const PopularEvents = () => {
         <hr className="w-48 h-1.5 bg-[#252525] rounded-lg mx-auto mb-12" />
 
         <div className="flex justify-center mb-8">
-          {/* College Dropdown Button - Increased Width and Font Size */}
           <div className="relative w-72 md:w-96">
             <button
               type="button"
@@ -87,31 +103,29 @@ const PopularEvents = () => {
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth="2"
                   d="M19 9l-7 7-7-7"
-                ></path>
+                />
               </svg>
             </button>
 
-            {/* College Dropdown Menu - Increased Font Size */}
             {showCollegeDropdown && (
               <div className="absolute left-0 mt-1 w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
-                <div className="py-1" role="menu" aria-orientation="vertical">
-                  {colleges &&
-                    colleges.map((college) => (
-                      <button
-                        key={college._id}
-                        className="w-full text-left px-5 py-3 text-base text-gray-700 hover:bg-gray-100"
-                        onClick={() => handleCollegeSelect(college?._id)}
-                      >
-                        {college.name}
-                      </button>
-                    ))}
+                <div className="py-1">
+                  {sortedColleges.map((college) => (
+                    <button
+                      key={college._id}
+                      className="w-full text-left px-5 py-3 text-base text-gray-700 hover:bg-gray-100"
+                      onClick={() => handleCollegeSelect(college._id)}
+                    >
+                      {college.name}
+                      {college._id === user?.college && " (Your College)"}
+                    </button>
+                  ))}
                   <hr className="my-1 border-gray-200" />
                   <button
                     className="w-full text-left px-5 py-3 text-base text-gray-700 hover:bg-gray-100 font-medium"
@@ -138,7 +152,7 @@ const PopularEvents = () => {
             ))
           ) : (
             <div className="col-span-full text-center py-8 text-gray-500">
-              No events found for the selected filter.
+              No events found for the selected college.
             </div>
           )}
         </div>

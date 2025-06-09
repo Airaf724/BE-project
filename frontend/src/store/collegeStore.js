@@ -109,7 +109,6 @@ export const useCollegeStore = create((set, get) => ({
     }
   },
 
-  // Reset store state
   resetState: () => {
     set({ college: null, loading: false, error: null, success: false });
   },
