@@ -109,7 +109,7 @@ export const getEventsByAdmin = async (req, res) => {
         .json({ success: false, message: "Admin ID is required" });
     }
 
-    const events = await Event.find({ adminId });
+    const events = await Event.find({ adminId }).sort({ event_date: -1 });
 
     res.status(200).json({ success: true, events });
   } catch (error) {
