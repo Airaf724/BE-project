@@ -7,6 +7,7 @@ import {
   Check,
   Clock,
   Award,
+  AlertCircle,
 } from "lucide-react";
 import { useEventStore } from "../store/eventStore";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -54,6 +55,30 @@ const EventDetailPage = () => {
         (att) => att.user.toString() === userId.toString()
       ));
 
+  // Check if event date has passed
+  const isEventDatePassed = () => {
+    if (!event?.event_date) return false;
+    const eventDate = new Date(event.event_date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day for comparison
+    return eventDate < today;
+  };
+
+  // Check if event is today
+  const isEventToday = () => {
+    if (!event?.event_date) return false;
+    const eventDate = new Date(event.event_date);
+    const today = new Date();
+    return (
+      eventDate.getDate() === today.getDate() &&
+      eventDate.getMonth() === today.getMonth() &&
+      eventDate.getFullYear() === today.getFullYear()
+    );
+  };
+
+  const eventDatePassed = isEventDatePassed();
+  const eventToday = isEventToday();
+
   useEffect(() => {
     fetchEventById(eventId);
 
@@ -69,6 +94,11 @@ const EventDetailPage = () => {
   const handleRegistration = async () => {
     if (!user) {
       navigate("/login");
+      return;
+    }
+
+    if (eventDatePassed) {
+      toast.error("Cannot register for past events");
       return;
     }
 
@@ -96,6 +126,11 @@ const EventDetailPage = () => {
 
   // Generate attendance code
   const handleGenerateAttendanceCode = async () => {
+    if (!eventToday && !eventDatePassed) {
+      toast.error("Attendance code can only be generated on the event day");
+      return;
+    }
+
     try {
       await generateAttendanceCode(eventId);
       toast.success("Attendance code generated successfully");
@@ -118,6 +153,11 @@ const EventDetailPage = () => {
 
     if (hasAttended) {
       toast.error("Your attendance has already been marked");
+      return;
+    }
+
+    if (!eventToday && !eventDatePassed) {
+      toast.error("Attendance can only be marked on the event day");
       return;
     }
 
@@ -182,6 +222,92 @@ const EventDetailPage = () => {
     return null;
   };
 
+  // Function to render event date status
+  const renderEventDateStatus = () => {
+    if (eventDatePassed && !isRegistered && !hasAttended) {
+      return (
+        <div className="flex items-center justify-center bg-red-100 p-4 rounded-lg border border-red-200">
+          <AlertCircle className="h-6 w-6 text-red-500 mr-2" />
+          <span className="text-red-700 font-medium">
+            Event date has passed - Registration and attendance marking are
+            closed
+          </span>
+        </div>
+      );
+    }
+
+    if (eventDatePassed && isRegistered && !hasAttended) {
+      return (
+        <div className="flex items-center justify-center bg-yellow-100 p-4 rounded-lg border border-yellow-200">
+          <AlertCircle className="h-6 w-6 text-yellow-600 mr-2" />
+          <span className="text-yellow-700 font-medium">
+            Event date has passed - You were registered but didn't attend
+          </span>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  // Function to get registration button text and state
+  const getRegistrationButtonState = () => {
+    if (eventDatePassed) {
+      return {
+        text: "Event Date Passed",
+        disabled: true,
+        className: "bg-gray-400 cursor-not-allowed text-white",
+      };
+    }
+
+    if (disabled) {
+      return {
+        text: "Processing...",
+        disabled: true,
+        className: "bg-gray-300 cursor-not-allowed",
+      };
+    }
+
+    return {
+      text: "Register",
+      disabled: false,
+      className: "bg-orange-500 hover:bg-orange-600 text-white",
+    };
+  };
+
+  // Function to get attendance marking button state
+  const getAttendanceButtonState = () => {
+    if (!eventToday && !eventDatePassed) {
+      return {
+        text: "Available on Event Day",
+        disabled: true,
+        className: "bg-gray-400 cursor-not-allowed text-white",
+      };
+    }
+
+    if (eventDatePassed && !hasAttended) {
+      return {
+        text: "Event Date Passed",
+        disabled: true,
+        className: "bg-gray-400 cursor-not-allowed text-white",
+      };
+    }
+
+    if (isVerifying || !attendanceCodeInput) {
+      return {
+        text: isVerifying ? "Verifying..." : "Mark Attendance",
+        disabled: true,
+        className: "bg-gray-300 cursor-not-allowed",
+      };
+    }
+
+    return {
+      text: "Mark Attendance",
+      disabled: false,
+      className: "bg-green-600 hover:bg-green-700 text-white",
+    };
+  };
+
   // Display loading state
   if (isLoading && !event) {
     return (
@@ -190,6 +316,9 @@ const EventDetailPage = () => {
       </div>
     );
   }
+
+  const registrationButtonState = getRegistrationButtonState();
+  const attendanceButtonState = getAttendanceButtonState();
 
   return (
     <div className="container flex justify-center items-start min-h-screen mx-auto p-6">
@@ -224,6 +353,16 @@ const EventDetailPage = () => {
                 <div>
                   <p className="font-medium">
                     {event ? formatDate(event.event_date) : "Loading date..."}
+                    {eventToday && (
+                      <span className="ml-2 text-sm bg-green-100 text-green-800 px-2 py-1 rounded">
+                        Today
+                      </span>
+                    )}
+                    {eventDatePassed && !eventToday && (
+                      <span className="ml-2 text-sm bg-red-100 text-red-800 px-2 py-1 rounded">
+                        Past Event
+                      </span>
+                    )}
                   </p>
                   <p className="text-gray-600">{event?.event_time || "TBD"}</p>
                 </div>
@@ -255,6 +394,9 @@ const EventDetailPage = () => {
             </div>
           </div>
 
+          {/* Show event date status */}
+          {!isAdmin && renderEventDateStatus()}
+
           {/* Show attendance status badge */}
           {!isAdmin && renderAttendanceStatus()}
 
@@ -263,14 +405,10 @@ const EventDetailPage = () => {
             <div className="flex justify-center w-full">
               <button
                 onClick={handleRegistration}
-                disabled={disabled}
-                className={`w-full py-2 px-4 rounded ${
-                  disabled
-                    ? "bg-gray-300 cursor-not-allowed"
-                    : "bg-orange-500 hover:bg-orange-600 text-white"
-                }`}
+                disabled={registrationButtonState.disabled}
+                className={`w-full py-2 px-4 rounded ${registrationButtonState.className}`}
               >
-                {disabled ? "Processing..." : "Register"}
+                {registrationButtonState.text}
               </button>
             </div>
           )}
@@ -283,11 +421,20 @@ const EventDetailPage = () => {
               {/* Attendance Code Generation */}
               <div className="space-y-3 pt-2">
                 <h3 className="font-medium">Code-Based Attendance</h3>
+
+                {!eventToday && !eventDatePassed && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded p-3 mb-3">
+                    <p className="text-yellow-800 text-sm">
+                      Attendance code can only be generated on the event day
+                    </p>
+                  </div>
+                )}
+
                 <button
                   onClick={handleGenerateAttendanceCode}
-                  disabled={isGenerating}
+                  disabled={isGenerating || (!eventToday && !eventDatePassed)}
                   className={`w-full py-2 px-4 rounded ${
-                    isGenerating
+                    isGenerating || (!eventToday && !eventDatePassed)
                       ? "bg-gray-300 cursor-not-allowed"
                       : "bg-green-600 hover:bg-green-700 text-white"
                   }`}
@@ -316,6 +463,15 @@ const EventDetailPage = () => {
           {!isAdmin && isRegistered && !hasAttended && (
             <div className="border border-gray-200 rounded-lg p-4 space-y-4">
               <h2 className="text-lg font-semibold">Mark Attendance</h2>
+
+              {!eventToday && !eventDatePassed && (
+                <div className="bg-blue-50 border border-blue-200 rounded p-3">
+                  <p className="text-blue-800 text-sm">
+                    Attendance can only be marked on the event day
+                  </p>
+                </div>
+              )}
+
               <div className="space-y-3">
                 <input
                   type="text"
@@ -323,17 +479,14 @@ const EventDetailPage = () => {
                   onChange={(e) => setAttendanceCodeInput(e.target.value)}
                   placeholder="Enter attendance code"
                   className="w-full p-2 border border-gray-300 rounded"
+                  disabled={!eventToday && !eventDatePassed}
                 />
                 <button
                   onClick={handleVerifyAttendanceCode}
-                  disabled={isVerifying || !attendanceCodeInput}
-                  className={`w-full py-2 px-4 rounded ${
-                    isVerifying || !attendanceCodeInput
-                      ? "bg-gray-300 cursor-not-allowed"
-                      : "bg-green-600 hover:bg-green-700 text-white"
-                  }`}
+                  disabled={attendanceButtonState.disabled}
+                  className={`w-full py-2 px-4 rounded ${attendanceButtonState.className}`}
                 >
-                  {isVerifying ? "Verifying..." : "Mark Attendance"}
+                  {attendanceButtonState.text}
                 </button>
               </div>
             </div>

@@ -3,6 +3,7 @@ import { Event } from "../models/events.model.js";
 import { uploadOnCloudinary } from "../utitls/cloudinary.js";
 import { User } from "../models/user.model.js";
 import { College } from "../models/college.model.js";
+
 export const createEvents = async (req, res) => {
   console.log("Request body:", req.body);
   console.log("Request file:", req.file);
@@ -77,7 +78,7 @@ export const createEvents = async (req, res) => {
 export const getEvents = async (req, res) => {
   try {
     const { collegeId, activeTab } = req.query;
-    const { sortBy = "createdAt", order = "asc" } = req.query;
+    const { sortBy = "event_date", order = "desc" } = req.query;
 
     // Validate sorting order
     const sortOrder = order === "desc" ? -1 : 1;
@@ -89,6 +90,7 @@ export const getEvents = async (req, res) => {
     if (activeTab === "college" && collegeId && collegeId !== "all") {
       query.college = collegeId;
     }
+
     const events = await Event.find(query).sort(sortOptions);
 
     res.status(200).json({ success: true, events });
